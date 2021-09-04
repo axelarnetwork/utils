@@ -3,6 +3,7 @@ package testutils
 
 import (
 	"fmt"
+	"os"
 	"testing"
 
 	abci "github.com/tendermint/tendermint/abci/types"
@@ -42,4 +43,13 @@ type ErrorCache struct {
 // Errorf records the given formatted string as an erro
 func (ec *ErrorCache) Errorf(format string, args ...interface{}) {
 	ec.Error = fmt.Errorf(format, args...)
+}
+
+// SetEnv safely sets an OS env var to the specified value and resets it to the original value upon test closure
+func SetEnv(t *testing.T, key string, val string) {
+	// TODO : enable with Go 1.17 >> it will automatically handle Cleanup
+	//t.Setenv(key, val)
+	orig := os.Getenv(key)
+	os.Setenv(key, val)
+	t.Cleanup(func() { os.Setenv(key, orig) })
 }
