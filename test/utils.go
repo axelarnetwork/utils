@@ -53,3 +53,41 @@ func SetEnv(t *testing.T, key string, val string) {
 	os.Setenv(key, val)
 	t.Cleanup(func() { os.Setenv(key, orig) })
 }
+
+/ CreateDeployGatewayTx assembles a transaction for smart contract deployment. See:
+// https://goethereumbook.org/en/smart-contract-deploy/
+// https://gist.github.com/tomconte/6ce22128b15ba36bb3d7585d5180fba0
+func CreateDeployGatewayTx(
+	byteCode []byte,
+	contractOwner, contractOperator common.Address,
+	gasPrice *big.Int,
+	gasLimit uint64,
+	rpc types.RPCClient,
+) (*gethTypes.Transaction, error) {
+	nonce, err := rpc.PendingNonceAt(context.Background(), contractOwner)
+	if err != nil {
+		return nil, err
+	}
+
+	if gasPrice == nil {
+		gasPrice, err = rpc.SuggestGasPrice(context.Background())
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	deploymentBytecode, err := types.GetGatewayDeploymentBytecode(byteCode, contractOperator)
+	if err != nil {
+		return nil, err
+	}
+
+	if gasLimit == 0 {
+		gasLimit, err = rpc.EstimateGas(context.Background(), geth.CallMsg{
+			To:   nil,
+			Data: deploymentBytecode,
+		})
+	}
+
+	return gethTypes.NewContractCreation(nonce, big.NewInt(0), gasLimit, gasPrice, deploymentBytecode), nil
+}
+
