@@ -54,7 +54,7 @@ func SetEnv(t *testing.T, key string, val string) {
 	t.Cleanup(func() { os.Setenv(key, orig) })
 }
 
-/ CreateDeployGatewayTx assembles a transaction for smart contract deployment. See:
+// CreateDeployGatewayTx assembles a transaction for smart contract deployment. See:
 // https://goethereumbook.org/en/smart-contract-deploy/
 // https://gist.github.com/tomconte/6ce22128b15ba36bb3d7585d5180fba0
 func CreateDeployGatewayTx(
