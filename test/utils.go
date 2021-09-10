@@ -2,11 +2,16 @@
 package testutils
 
 import (
+	"context"
 	"fmt"
+	"math/big"
 	"os"
 	"testing"
 
+	geth "github.com/ethereum/go-ethereum"
+	gethTypes "github.com/ethereum/go-ethereum/core/types"
 	abci "github.com/tendermint/tendermint/abci/types"
+	evmTypes "github.com/axelarnetwork/axelar-core/x/evm/types"
 )
 
 // Func wraps a regular testing function so it can be used as a pointer function receiver
@@ -62,7 +67,7 @@ func CreateDeployGatewayTx(
 	contractOwner, contractOperator common.Address,
 	gasPrice *big.Int,
 	gasLimit uint64,
-	rpc types.RPCClient,
+	evmTypes types.RPCClient,
 ) (*gethTypes.Transaction, error) {
 	nonce, err := rpc.PendingNonceAt(context.Background(), contractOwner)
 	if err != nil {
@@ -76,7 +81,7 @@ func CreateDeployGatewayTx(
 		}
 	}
 
-	deploymentBytecode, err := types.GetGatewayDeploymentBytecode(byteCode, contractOperator)
+	deploymentBytecode, err := evmTypes.GetGatewayDeploymentBytecode(byteCode, contractOperator)
 	if err != nil {
 		return nil, err
 	}
