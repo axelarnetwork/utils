@@ -36,7 +36,7 @@ func TestFileUtils(t *testing.T) {
 							assert.Equal(
 								t,
 								expected,
-								*resolved,
+								resolved,
 							)
 						}
 					}
@@ -115,13 +115,14 @@ func TestFileUtils(t *testing.T) {
 			)
 
 			t.Run(
-				"GIVEN absolute path containing . EXPECT identical path", func(t *testing.T) {
+				"GIVEN absolute path containing . EXPECT path cleanup", func(t *testing.T) {
 					path := "/./axelar/test"
+					expected := "/axelar/test"
 					resolved, err := Resolve(path)
 					if assert.NoError(t, err) {
 						assert.Equal(
 							t,
-							path,
+							expected,
 							resolved,
 						)
 					}

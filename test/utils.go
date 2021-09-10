@@ -90,7 +90,7 @@ func writeFile(filepath string, contents []byte, perm fs.FileMode) {
 	if err != nil {
 		panic(err)
 	}
-	err = ioutil.WriteFile(*resolved, contents, perm)
+	err = ioutil.WriteFile(resolved, contents, perm)
 	if err != nil {
 		panic(err)
 	}
@@ -101,7 +101,7 @@ func readFile(filepath string) []byte {
 	if err != nil {
 		panic(err)
 	}
-	contents, err := ioutil.ReadFile(*resolved)
+	contents, err := ioutil.ReadFile(resolved)
 	if err != nil {
 		panic(err)
 	}
