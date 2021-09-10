@@ -13,12 +13,14 @@ func TestFileUtils(t *testing.T) {
 	t.Run(
 		"GIVEN absolute path EXPECT identical absolute path", func(t *testing.T) {
 			path := "/tmp/axelar/test"
-			resolved := resolve(path)
-			assert.Equal(
-				t,
-				path,
-				resolved,
-			)
+			resolved, err := Resolve(path)
+			if assert.NoError(t, err) {
+				assert.Equal(
+					t,
+					path,
+					resolved,
+				)
+			}
 		},
 	)
 
@@ -29,12 +31,14 @@ func TestFileUtils(t *testing.T) {
 					path := "~"
 					expected, err := os.UserHomeDir()
 					if assert.NoError(t, err) {
-						resolved := resolve(path)
-						assert.Equal(
-							t,
-							expected,
-							resolved,
-						)
+						resolved, err := Resolve(path)
+						if assert.NoError(t, err) {
+							assert.Equal(
+								t,
+								expected,
+								*resolved,
+							)
+						}
 					}
 				},
 			)
@@ -45,12 +49,14 @@ func TestFileUtils(t *testing.T) {
 					home, err := os.UserHomeDir()
 					if assert.NoError(t, err) {
 						expected := fmt.Sprintf("%v/axelar/test", home)
-						resolved := resolve(path)
-						assert.Equal(
-							t,
-							expected,
-							resolved,
-						)
+						resolved, err := Resolve(path)
+						if assert.NoError(t, err) {
+							assert.Equal(
+								t,
+								expected,
+								resolved,
+							)
+						}
 					}
 				},
 			)
@@ -58,12 +64,14 @@ func TestFileUtils(t *testing.T) {
 			t.Run(
 				"GIVEN absolute path containing ~ EXPECT identical path", func(t *testing.T) {
 					path := "/~/axelar/test"
-					resolved := resolve(path)
-					assert.Equal(
-						t,
-						path,
-						resolved,
-					)
+					resolved, err := Resolve(path)
+					if assert.NoError(t, err) {
+						assert.Equal(
+							t,
+							path,
+							resolved,
+						)
+					}
 				},
 			)
 		},
@@ -76,12 +84,14 @@ func TestFileUtils(t *testing.T) {
 					path := "."
 					expected, err := os.Getwd()
 					if assert.NoError(t, err) {
-						resolved := resolve(path)
-						assert.Equal(
-							t,
-							expected,
-							resolved,
-						)
+						resolved, err := Resolve(path)
+						if assert.NoError(t, err) {
+							assert.Equal(
+								t,
+								expected,
+								resolved,
+							)
+						}
 					}
 				},
 			)
@@ -92,12 +102,14 @@ func TestFileUtils(t *testing.T) {
 					wd, err := os.Getwd()
 					expected := fmt.Sprintf("%v/tmp/test", wd)
 					if assert.NoError(t, err) {
-						resolved := resolve(path)
-						assert.Equal(
-							t,
-							expected,
-							resolved,
-						)
+						resolved, err := Resolve(path)
+						if assert.NoError(t, err) {
+							assert.Equal(
+								t,
+								expected,
+								resolved,
+							)
+						}
 					}
 				},
 			)
@@ -105,12 +117,14 @@ func TestFileUtils(t *testing.T) {
 			t.Run(
 				"GIVEN absolute path containing . EXPECT identical path", func(t *testing.T) {
 					path := "/./axelar/test"
-					resolved := resolve(path)
-					assert.Equal(
-						t,
-						path,
-						resolved,
-					)
+					resolved, err := Resolve(path)
+					if assert.NoError(t, err) {
+						assert.Equal(
+							t,
+							path,
+							resolved,
+						)
+					}
 				},
 			)
 		},

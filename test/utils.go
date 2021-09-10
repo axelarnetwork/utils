@@ -3,9 +3,13 @@ package testutils
 
 import (
 	"fmt"
+	"io/fs"
+	"io/ioutil"
 	"os"
+	"path/filepath"
 	"testing"
 
+	"github.com/axelarnetwork/utils/file"
 	abci "github.com/tendermint/tendermint/abci/types"
 )
 
@@ -52,4 +56,54 @@ func SetEnv(t *testing.T, key string, val string) {
 	orig := os.Getenv(key)
 	os.Setenv(key, val)
 	t.Cleanup(func() { os.Setenv(key, orig) })
+}
+
+// SetFileContents safely sets the contents of the specified filepath to the specified value, then resets it to the original value upon test closure
+func SetFileContents(t *testing.T, filepath string, contents string) {
+	SetFileContentsAndPermissions(t, filepath, contents, 0644)
+}
+
+// SetFileContentsAndPermissions safely sets the contents of the specified filepath to the specified value and FileMode, then resets it to the original value upon test closure
+func SetFileContentsAndPermissions(t *testing.T, path string, contents string, perm fs.FileMode) {
+	os.MkdirAll(filepath.Dir(path), os.ModePerm)
+	_, err := os.Stat(path)
+	if os.IsNotExist(err) {
+		file, err := os.Create(path)
+		if err != nil {
+			panic(err)
+		}
+		defer file.Close()
+	}
+
+	original := readFile(path)
+	writeFile(path, []byte(contents), perm)
+	// this may be overkill to reset the file to its original value
+	t.Cleanup(
+		func() {
+			writeFile(path, original, perm)
+		},
+	)
+}
+
+func writeFile(filepath string, contents []byte, perm fs.FileMode) {
+	resolved, err := file.Resolve(filepath)
+	if err != nil {
+		panic(err)
+	}
+	err = ioutil.WriteFile(*resolved, contents, perm)
+	if err != nil {
+		panic(err)
+	}
+}
+
+func readFile(filepath string) []byte {
+	resolved, err := file.Resolve(filepath)
+	if err != nil {
+		panic(err)
+	}
+	contents, err := ioutil.ReadFile(*resolved)
+	if err != nil {
+		panic(err)
+	}
+	return contents
 }
