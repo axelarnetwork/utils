@@ -9,7 +9,6 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/axelarnetwork/utils/file"
 	abci "github.com/tendermint/tendermint/abci/types"
 )
 
@@ -86,22 +85,14 @@ func SetFileContentsAndPermissions(t *testing.T, path string, contents string, p
 }
 
 func writeFile(filepath string, contents []byte, perm fs.FileMode) {
-	resolved, err := file.Resolve(filepath)
-	if err != nil {
-		panic(err)
-	}
-	err = ioutil.WriteFile(resolved, contents, perm)
+	err := ioutil.WriteFile(filepath, contents, perm)
 	if err != nil {
 		panic(err)
 	}
 }
 
 func readFile(filepath string) []byte {
-	resolved, err := file.Resolve(filepath)
-	if err != nil {
-		panic(err)
-	}
-	contents, err := ioutil.ReadFile(resolved)
+	contents, err := ioutil.ReadFile(filepath)
 	if err != nil {
 		panic(err)
 	}
