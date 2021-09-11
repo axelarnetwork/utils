@@ -7,6 +7,7 @@ import (
 	"strings"
 )
 
+// Resolve resolves relative paths to absolute paths, including ~/ shortcuts
 func Resolve(path string) (string, error) {
 	path, err := resolveHome(path)
 	if err != nil {
