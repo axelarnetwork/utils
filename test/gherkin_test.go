@@ -15,24 +15,24 @@ func TestGherkin(t *testing.T) {
 		Or(
 			test.Given("additional setup", func(t *testing.T) { testLabel += " AND GIVEN additional setup" }).
 				And().Given("even more setup", func(t *testing.T) { testLabel += " AND GIVEN even more setup" }).
-				When("a condition is added", func(t *testing.T) { testLabel += " WHEN a condition is added" }).
+				When("a trigger happens", func(t *testing.T) { testLabel += " WHEN a trigger happens" }).
 				Or(
-					test.When("a second condition is added", func(t *testing.T) { testLabel += " AND WHEN a second condition is added" }).
-						And().When("a third condition is added", func(t *testing.T) { testLabel += " AND WHEN a third condition is added" }).
-						Then("we finally execute", func(t *testing.T) {
-							testLabel += " THEN we finally execute"
+					test.When("a second trigger happens", func(t *testing.T) { testLabel += " AND WHEN a second trigger happens" }).
+						And().When("a third trigger happens", func(t *testing.T) { testLabel += " AND WHEN a third trigger happens" }).
+						Then("we finally check the outcome", func(t *testing.T) {
+							testLabel += " THEN we finally check the outcome"
 							assertNameEquals(t, testLabel)
 							testPaths++
 						}),
-					test.Then("we execute directly", func(t *testing.T) {
-						testLabel += " THEN we execute directly"
+					test.Then("we check the outcome directly", func(t *testing.T) {
+						testLabel += " THEN we check the outcome directly"
 						assertNameEquals(t, testLabel)
 						testPaths++
 					}),
 				),
-			test.When("we directly add a condition", func(t *testing.T) { testLabel += " WHEN we directly add a condition" }).
-				Then("we execute even earlier", func(t *testing.T) {
-					testLabel += " THEN we execute even earlier"
+			test.When("we directly hit the trigger", func(t *testing.T) { testLabel += " WHEN we directly hit the trigger" }).
+				Then("we check the outcome even earlier", func(t *testing.T) {
+					testLabel += " THEN we check the outcome even earlier"
 					assertNameEquals(t, testLabel)
 					testPaths++
 				}),
@@ -45,6 +45,18 @@ func TestGherkin(t *testing.T) {
 	testPaths = 0
 	testSetup.Run(t, 15)
 	assert.Equal(t, 3*15, testPaths)
+}
+
+func TestGherkinPanicsGIVENAfterWHEN(t *testing.T) {
+	assert.Panics(t, func() {
+		test.Given("precondition", func(*testing.T) {}).
+			When("trigger", func(*testing.T) {}).
+			Or(
+				test.Given("forbidden statement", func(*testing.T) {}).
+					When("trigger", func(*testing.T) {}).
+					Then("check", func(*testing.T) {}),
+			)
+	})
 }
 
 func assertNameEquals(t *testing.T, testLabel string) bool {
