@@ -4,33 +4,33 @@ import (
 	"strings"
 	"testing"
 
-	test "github.com/axelarnetwork/utils/test"
+	. "github.com/axelarnetwork/utils/test"
 	"github.com/stretchr/testify/assert"
 )
 
-func TestGherkin(t *testing.T) {
+func TestGherkinSyntax(t *testing.T) {
 	var testLabel string
 	var testPaths int
-	testSetup := test.Given("some setup", func(t *testing.T) { testLabel = "GIVEN some setup" }).
+	testSetup := Given("some setup", func(t *testing.T) { testLabel = "GIVEN some setup" }).
 		Or(
-			test.Given("additional setup", func(t *testing.T) { testLabel += " AND GIVEN additional setup" }).
+			Given("additional setup", func(t *testing.T) { testLabel += " AND GIVEN additional setup" }).
 				And().Given("even more setup", func(t *testing.T) { testLabel += " AND GIVEN even more setup" }).
 				When("a trigger happens", func(t *testing.T) { testLabel += " WHEN a trigger happens" }).
 				Or(
-					test.When("a second trigger happens", func(t *testing.T) { testLabel += " AND WHEN a second trigger happens" }).
+					When("a second trigger happens", func(t *testing.T) { testLabel += " AND WHEN a second trigger happens" }).
 						And().When("a third trigger happens", func(t *testing.T) { testLabel += " AND WHEN a third trigger happens" }).
 						Then("we finally check the outcome", func(t *testing.T) {
 							testLabel += " THEN we finally check the outcome"
 							assertNameEquals(t, testLabel)
 							testPaths++
 						}),
-					test.Then("we check the outcome directly", func(t *testing.T) {
+					Then("we check the outcome directly", func(t *testing.T) {
 						testLabel += " THEN we check the outcome directly"
 						assertNameEquals(t, testLabel)
 						testPaths++
 					}),
 				),
-			test.When("we directly hit the trigger", func(t *testing.T) { testLabel += " WHEN we directly hit the trigger" }).
+			When("we directly hit the trigger", func(t *testing.T) { testLabel += " WHEN we directly hit the trigger" }).
 				Then("we check the outcome even earlier", func(t *testing.T) {
 					testLabel += " THEN we check the outcome even earlier"
 					assertNameEquals(t, testLabel)
@@ -49,12 +49,21 @@ func TestGherkin(t *testing.T) {
 
 func TestGherkinPanicsGIVENAfterWHEN(t *testing.T) {
 	assert.Panics(t, func() {
-		test.Given("precondition", func(*testing.T) {}).
+		Given("precondition", func(*testing.T) {}).
 			When("trigger", func(*testing.T) {}).
 			Or(
-				test.Given("forbidden statement", func(*testing.T) {}).
+				Given("forbidden statement", func(*testing.T) {}).
 					When("trigger", func(*testing.T) {}).
 					Then("check", func(*testing.T) {}),
+			)
+	})
+}
+
+func TestGherkinPanicsTHENAfterGIVEN(t *testing.T) {
+	assert.Panics(t, func() {
+		Given("precondition", func(*testing.T) {}).
+			Or(
+				Then("check", func(*testing.T) {}),
 			)
 	})
 }

@@ -110,23 +110,13 @@ func (w when) When(description string, setup func(t *testing.T)) ThenStatement {
 
 // Or allows test branching by adding multiple sub-statements after a GIVEN
 func (w when) Or(tests ...Runner) Runner {
+	checkFirstWordOfLabels(tests, assertNotTHEN)
 	return or(w.label, w.test, tests)
 }
 
 // Or allows test branching by adding multiple sub-statements after a WHEN
 func (t then) Or(tests ...Runner) Runner {
-	for _, test := range tests {
-		switch test := test.(type) {
-		case runner:
-			assertNotGIVEN(test.label[0])
-		case multiRunner:
-			for _, r := range test.runners {
-				assertNotGIVEN(r.label[0])
-			}
-		default:
-			panic("do not extend the test suite with custom types")
-		}
-	}
+	checkFirstWordOfLabels(tests, assertNotGIVEN)
 	return or(t.label, t.test, tests)
 }
 
@@ -168,9 +158,30 @@ func (r runner) Run(t *testing.T, repeats ...int) bool {
 	}).Repeat(repeat))
 }
 
+func checkFirstWordOfLabels(tests []Runner, assertion func(string)) {
+	for _, test := range tests {
+		switch test := test.(type) {
+		case runner:
+			assertion(test.label[0])
+		case multiRunner:
+			for _, r := range test.runners {
+				assertion(r.label[0])
+			}
+		default:
+			panic("do not extend the test suite with custom types")
+		}
+	}
+}
+
 func assertNotGIVEN(label string) {
 	if label == _given {
 		panic("GIVEN is not allowed after WHEN")
+	}
+}
+
+func assertNotTHEN(label string) {
+	if label == _then {
+		panic("THEN is not allowed after GIVEN")
 	}
 }
 
