@@ -1,0 +1,59 @@
+name: Check Generated Files Up-to-date
+
+on:
+  - pull_request
+
+jobs:
+  check-go-generate-up-to-date:
+    strategy:
+      matrix:
+        go-version:
+          - 1.16.x
+        os:
+          - ubuntu-18.04
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Install Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: ${{ matrix.go-version }}
+
+      - name: Install Python
+        uses: actions/setup-python@v1
+
+      - name: Set up ssh agent
+        uses: webfactory/ssh-agent@v0.5.2
+        with:
+          ssh-private-key: ${{ secrets.CICD_RSA_KEY }}
+
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Install moq
+        run: |
+          git config --global url."git@github.com:axelarnetwork".insteadOf https://github.com/axelarnetwork
+          go get github.com/matryer/moq
+
+      - name: Install mdformat
+
+        uses: BSFishy/pip-action@v1
+        with:
+          # The packages to install from Pip
+          packages: mdformat
+
+      - name: Run go generate
+        run: make generate
+
+      - name: Check for changes
+        run: |
+          if [ -n "$(git status --porcelain)" ]; then
+            echo Following files are changed...
+            git status
+
+            echo Changes:
+            git diff
+
+            exit 1;
+          else
+            exit 0;
+          fi
