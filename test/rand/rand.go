@@ -5,8 +5,11 @@ import (
 	"time"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/cosmos/cosmos-sdk/types/address"
+)
 
-	"github.com/ethereum/go-ethereum/common/math"
+const (
+	maxInt32 = 1<<31 - 1
 )
 
 func init() {
@@ -133,7 +136,7 @@ func Distr(n int) DistrGen {
 	var resolution int64 = 10
 
 	// Ensure the total stays in int64
-	if resolution*int64(n) > math.MaxInt32 {
+	if resolution*int64(n) > maxInt32 {
 		panic("decrease either number of states or resolution")
 	}
 	for _, n := range I64GenBetween(1, resolution*int64(n)).Take(n) {
@@ -278,10 +281,10 @@ func (g DistinctStrGen) Next() string {
 
 // ValAddr generates a random validator address
 func ValAddr() sdk.ValAddress {
-	return Bytes(sdk.AddrLen)
+	return Bytes(address.Len)
 }
 
 // AccAddr generates a random cosmos address
 func AccAddr() sdk.AccAddress {
-	return Bytes(sdk.AddrLen)
+	return Bytes(address.Len)
 }
