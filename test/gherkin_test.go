@@ -12,11 +12,11 @@ func TestGherkinSyntax(t *testing.T) {
 	var testLabel string
 	var testPaths int
 	testSetup := Given("some setup", func(t *testing.T) { testLabel = "GIVEN some setup" }).
-		Or(
+		Branch(
 			Given("additional setup", func(t *testing.T) { testLabel += " AND GIVEN additional setup" }).
 				And().Given("even more setup", func(t *testing.T) { testLabel += " AND GIVEN even more setup" }).
 				When("a trigger happens", func(t *testing.T) { testLabel += " WHEN a trigger happens" }).
-				Or(
+				Branch(
 					When("a second trigger happens", func(t *testing.T) { testLabel += " AND WHEN a second trigger happens" }).
 						And().When("a third trigger happens", func(t *testing.T) { testLabel += " AND WHEN a third trigger happens" }).
 						Then("we finally check the outcome", func(t *testing.T) {
@@ -51,7 +51,7 @@ func TestGherkinPanicsGIVENAfterWHEN(t *testing.T) {
 	assert.Panics(t, func() {
 		Given("precondition", func(*testing.T) {}).
 			When("trigger", func(*testing.T) {}).
-			Or(
+			Branch(
 				Given("forbidden statement", func(*testing.T) {}).
 					When("trigger", func(*testing.T) {}).
 					Then("check", func(*testing.T) {}),
@@ -62,7 +62,7 @@ func TestGherkinPanicsGIVENAfterWHEN(t *testing.T) {
 func TestGherkinPanicsTHENAfterGIVEN(t *testing.T) {
 	assert.Panics(t, func() {
 		Given("precondition", func(*testing.T) {}).
-			Or(
+			Branch(
 				Then("check", func(*testing.T) {}),
 			)
 	})
