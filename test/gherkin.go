@@ -140,7 +140,9 @@ func (t then) Then(description string, execution func(t *testing.T)) Runner {
 func (r multiRunner) Run(t *testing.T, repeats ...int) bool {
 	result := true
 	for _, runner := range r.runners {
-		result = result && runner.Run(t, repeats...)
+		// cannot inline this because if result is false the second part of && is not going to be evaluated
+		newResult := runner.Run(t, repeats...)
+		result = result && newResult
 	}
 	return result
 }
