@@ -20,14 +20,14 @@ type GivenStatement interface {
 // WhenStatement is used to hit a trigger - do not implement yourself
 type WhenStatement interface {
 	And() GivenStatement
-	Or(...Runner) Runner
+	Branch(...Runner) Runner
 	When(description string, setup func(t *testing.T)) ThenStatement
 }
 
 // ThenStatement is used to check the test outcome - do not implement yourself
 type ThenStatement interface {
 	And() WhenStatement
-	Or(...Runner) Runner
+	Branch(...Runner) Runner
 	Then(description string, execution func(t *testing.T)) Runner
 }
 
@@ -68,7 +68,7 @@ func Given(description string, setup func(t *testing.T)) WhenStatement {
 	}
 }
 
-// When is an independent trigger that can be used to start a statement in an Or condition
+// When is an independent trigger that can be used to start a statement in a Branch
 func When(description string, setup func(t *testing.T)) ThenStatement {
 	return then{
 		label: []string{_when, description},
@@ -76,7 +76,7 @@ func When(description string, setup func(t *testing.T)) ThenStatement {
 	}
 }
 
-// Then is an independent outcome check that can be used to start a statement in an Or condition
+// Then is an independent outcome check that can be used to start a statement in a Branch
 func Then(description string, setup func(t *testing.T)) Runner {
 	return runner{
 		label: []string{_then, description},
@@ -108,16 +108,16 @@ func (w when) When(description string, setup func(t *testing.T)) ThenStatement {
 	}
 }
 
-// Or allows test branching by adding multiple sub-statements after a GIVEN
-func (w when) Or(tests ...Runner) Runner {
+// Branch allows test branching by adding multiple sub-statements after a Given
+func (w when) Branch(tests ...Runner) Runner {
 	checkFirstWordOfLabels(tests, assertNotTHEN)
-	return or(w.label, w.test, tests)
+	return branch(w.label, w.test, tests)
 }
 
-// Or allows test branching by adding multiple sub-statements after a WHEN
-func (t then) Or(tests ...Runner) Runner {
+// Branch allows test branching by adding multiple sub-statements after a When
+func (t then) Branch(tests ...Runner) Runner {
 	checkFirstWordOfLabels(tests, assertNotGIVEN)
-	return or(t.label, t.test, tests)
+	return branch(t.label, t.test, tests)
 }
 
 // And allows to concatenate an additional trigger
@@ -187,7 +187,7 @@ func assertNotTHEN(label string) {
 	}
 }
 
-func or(startLabel []string, startTest []func(t *testing.T), tests []Runner) Runner {
+func branch(startLabel []string, startTest []func(t *testing.T), tests []Runner) Runner {
 	var mr multiRunner
 	for _, test := range tests {
 		switch test := test.(type) {
