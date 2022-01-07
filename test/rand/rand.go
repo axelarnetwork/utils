@@ -192,6 +192,26 @@ func Strings(minLength int, maxLength int) StringGen {
 	}
 }
 
+// AlphaStrings returns a random string generator that produces strings from the alphabetical characters of random length in the given limits (inclusive)
+func AlphaStrings(minLength int, maxLength int) StringGen {
+	alphabet := []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
+	return StringGen{
+		lengthGen:  I64GenBetween(int64(minLength), int64(maxLength+1)),
+		alphabet:   alphabet,
+		charPicker: I64GenBetween(0, int64(len(alphabet))),
+	}
+}
+
+// AlphaNumericStrings returns a random string generator that produces strings from the alphanumeric characters of random length in the given limits (inclusive)
+func AlphaNumericStrings(minLength int, maxLength int) StringGen {
+	alphabet := []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789")
+	return StringGen{
+		lengthGen:  I64GenBetween(int64(minLength), int64(maxLength+1)),
+		alphabet:   alphabet,
+		charPicker: I64GenBetween(0, int64(len(alphabet))),
+	}
+}
+
 // HexStrings returns a random hex string generator that produces hex strings with given length
 func HexStrings(length int) StringGen {
 	alphabet := []rune("0123456789abcdef")
@@ -206,6 +226,18 @@ func HexStrings(length int) StringGen {
 // StrBetween returns a random string of random length in the given limits (inclusive)
 func StrBetween(minLength int, maxLength int) string {
 	g := Strings(minLength, maxLength)
+	return g.Next()
+}
+
+// AlphaStrBetween returns a random alphabetical string of random length in the given limits (inclusive)
+func AlphaStrBetween(minLength int, maxLength int) string {
+	g := AlphaStrings(minLength, maxLength)
+	return g.Next()
+}
+
+// AlphaNumericStrBetween returns a random alphanumeric string of random length in the given limits (inclusive)
+func AlphaNumericStrBetween(minLength int, maxLength int) string {
+	g := AlphaNumericStrings(minLength, maxLength)
 	return g.Next()
 }
 
