@@ -84,10 +84,11 @@ func (mgr *JobManager) AddJobs(jobs ...Job) {
 
 // AddJob spawns a new goroutine for the given job, manages its lifetime and handles its errors
 func (mgr *JobManager) AddJob(j Job) {
+	mgr.wgJobs.Add(1)
 	go func() {
-		mgr.wgJobs.Add(1)
 		if err := mgr.jobCapacity.Acquire(mgr.ctx, 1); err != nil {
 			mgr.tryCacheError(err)
+			mgr.jobCapacity.Release(1)
 			return
 		}
 		go func() {
