@@ -18,12 +18,29 @@ func TestJobManager_Errs(t *testing.T) {
 	jobCount := rand.I64Between(0, 100)
 	mgr := jobs.NewMgr(context.Background())
 	for i := int64(0); i < jobCount; i++ {
-		job := randomJob(i)
+		job := func(ctx context.Context) error {
+			return fmt.Errorf("error by job %d", i)
+		}
 		mgr.AddJob(job)
 	}
 	// test
 	<-mgr.Done()
 	assert.Len(t, mgr.Errs(), int(jobCount))
+}
+
+func TestJobManager_Errs_WithSmallCachSize(t *testing.T) {
+	jobCount := rand.I64Between(20, 100)
+	errorCacheSize := int64(10)
+	mgr := jobs.NewMgr(context.Background(), jobs.WithErrorCacheCapacity(errorCacheSize))
+	for i := int64(0); i < jobCount; i++ {
+		job := func(ctx context.Context) error {
+			return fmt.Errorf("error by job %d", i)
+		}
+		mgr.AddJob(job)
+	}
+	// test
+	<-mgr.Done()
+	assert.Len(t, mgr.Errs(), int(errorCacheSize))
 }
 
 func TestJobManager_ContextCancelled(t *testing.T) {
@@ -95,10 +112,3 @@ func TestJobManager_MoreJobsThanCap(t *testing.T) {
 }
 
 // this extracted function is needed to close over the loop counter i
-func randomJob(i int64) jobs.Job {
-	return func(ctx context.Context) error {
-		duration := time.Duration(rand.I64Between(0, 100)) * time.Millisecond
-		time.Sleep(duration)
-		return fmt.Errorf("error by job %d", i)
-	}
-}
