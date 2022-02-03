@@ -88,6 +88,7 @@ func (mgr *JobManager) AddJob(j Job) {
 		mgr.wgJobs.Add(1)
 		if err := mgr.jobCapacity.Acquire(mgr.ctx, 1); err != nil {
 			mgr.tryCacheError(err)
+			return
 		}
 		go func() {
 			defer mgr.wgJobs.Done()
