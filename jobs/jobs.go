@@ -29,7 +29,7 @@ func (mgr *capacityMgr) Acquire(ctx context.Context, n int64) error {
 	if mgr.semaphore != nil {
 		return mgr.semaphore.Acquire(ctx, n)
 	}
-	return nil
+	return ctx.Err()
 }
 
 func (mgr *capacityMgr) Release(n int64) {
@@ -88,7 +88,7 @@ func (mgr *JobManager) AddJob(j Job) {
 	go func() {
 		if err := mgr.jobCapacity.Acquire(mgr.ctx, 1); err != nil {
 			mgr.tryCacheError(err)
-			mgr.jobCapacity.Release(1)
+			mgr.wgJobs.Done()
 			return
 		}
 		go func() {

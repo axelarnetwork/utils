@@ -41,7 +41,7 @@ func TestJobManager_Errs(t *testing.T) {
 		errorCacheSize int64
 	)
 
-	Given("a job manager with small error chache", func(t *testing.T) {
+	Given("a job manager with small error cache", func(t *testing.T) {
 		errorCacheSize = rand.I64Between(1, 20)
 		mgr = jobs.NewMgr(context.Background(), jobs.WithErrorCacheCapacity(errorCacheSize))
 	}).
@@ -67,7 +67,7 @@ func TestJobManager_Errs(t *testing.T) {
 		var ctx context.Context
 		ctx, cancel = context.WithCancel(context.Background())
 		mgr = jobs.NewMgr(ctx)
-	}).
+	}).Branch(
 		When("blocking jobs are added", func(t *testing.T) {
 			jobCount = rand.I64Between(0, 100)
 			for i := 0; i < int(jobCount); i++ {
@@ -77,16 +77,38 @@ func TestJobManager_Errs(t *testing.T) {
 				})
 			}
 		}).
-		Then("block until the context is cancelled", func(t *testing.T) {
-			select {
-			case <-mgr.Done():
-				assert.Fail(t, "it should be impossible for the mgr to be done here")
-			default:
-				break
-			}
+			Then("block until the context is cancelled", func(t *testing.T) {
+				select {
+				case <-mgr.Done():
+					assert.Fail(t, "it should be impossible for the mgr to be done here")
+				default:
+					break
+				}
 
+				cancel()
+
+				timeout, timeoutCancel := context.WithTimeout(context.Background(), 1*time.Second)
+				defer timeoutCancel()
+
+				select {
+				case <-mgr.Done():
+					break
+				case <-timeout.Done():
+					assert.Fail(t, "timed out")
+				}
+			}),
+		When("jobs are added after the context is cancelled", func(t *testing.T) {
 			cancel()
 
+			jobCount = rand.I64Between(0, 100)
+			for i := 0; i < int(jobCount); i++ {
+				mgr.AddJob(func(ctx context.Context) error {
+					assert.Fail(t, "should not have been called")
+					<-ctx.Done()
+					return nil
+				})
+			}
+		}).Then("do not execute the jobs", func(t *testing.T) {
 			timeout, timeoutCancel := context.WithTimeout(context.Background(), 1*time.Second)
 			defer timeoutCancel()
 
@@ -96,7 +118,7 @@ func TestJobManager_Errs(t *testing.T) {
 			case <-timeout.Done():
 				assert.Fail(t, "timed out")
 			}
-		}).Run(t, 20)
+		})).Run(t, 20)
 
 	var (
 		capacity    int64
