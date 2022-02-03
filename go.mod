@@ -9,6 +9,7 @@ require (
 	github.com/stretchr/testify v1.7.0
 	github.com/syndtr/goleveldb v1.0.1-0.20210305035536-64b5b1c73954 // indirect
 	github.com/tendermint/tendermint v0.34.14
+	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c
 )
 
 replace github.com/gogo/protobuf => github.com/regen-network/protobuf v1.3.3-alpha.regen.1
