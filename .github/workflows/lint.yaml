@@ -18,11 +18,11 @@ jobs:
         with:
           go-version: ${{ matrix.go-version }}
 
-      - name: Install golint
-        run: go get -u golang.org/x/lint/golint
-
       - name: Checkout code
         uses: actions/checkout@v2
+
+      - name: Install golint
+        run: go get -u golang.org/x/lint/golint
 
       - name: Golint
         run: golint -set_exit_status ./...
