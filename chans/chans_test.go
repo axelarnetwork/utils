@@ -53,3 +53,26 @@ func TestForEach(t *testing.T) {
 
 	assert.Equal(t, 100, total)
 }
+
+func TestFlatten(t *testing.T) {
+	source := make(chan []int, 1)
+
+	out := Flatten(source)
+
+	total := 0
+	wg := &sync.WaitGroup{}
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		for x := range out {
+			total += x
+		}
+	}()
+
+	for i := 0; i < 99; i += 3 {
+		source <- []int{i, i + 1, i + 2}
+	}
+	close(source)
+	wg.Wait()
+	assert.Equal(t, 4851, total)
+}
