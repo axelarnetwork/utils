@@ -1,5 +1,6 @@
 package slices
 
+// Map maps a slice of T to a slice of S
 func Map[T, S any](source []T, f func(T) S) []S {
 	out := make([]S, 0, cap(source))
 
