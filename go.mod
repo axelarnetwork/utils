@@ -7,6 +7,7 @@ require (
 	github.com/matryer/moq v0.2.6
 	github.com/stretchr/testify v1.7.1
 	github.com/tendermint/tendermint v0.34.16
+	golang.org/x/exp v0.0.0-20220328175248-053ad81199eb
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c
 )
 
