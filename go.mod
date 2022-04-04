@@ -4,7 +4,7 @@ go 1.18
 
 require (
 	github.com/cosmos/cosmos-sdk v0.45.1
-	github.com/matryer/moq v0.2.6
+	github.com/matryer/moq v0.2.7
 	github.com/stretchr/testify v1.7.1
 	github.com/tendermint/tendermint v0.34.16
 	golang.org/x/exp v0.0.0-20220328175248-053ad81199eb

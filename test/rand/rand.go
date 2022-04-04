@@ -35,7 +35,7 @@ func I64Between[T constraints.Integer](lower T, upper T) int64 {
 
 // I64Gen represents an random integer generator to generate a sequence of integers with the same properties.
 // Call Stop when done so dangling goroutines can be cleaned up.
-type I64Gen[T constraints.Integer] struct {
+type I64Gen struct {
 	gen func() int64
 }
 
