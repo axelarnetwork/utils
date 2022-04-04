@@ -4,6 +4,8 @@ import (
 	"math/rand"
 	"time"
 
+	"golang.org/x/exp/constraints"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/address"
 )
@@ -27,8 +29,8 @@ func PosI64() int64 {
 
 // I64Between returns a random integer between lower (inclusive) and upper (exclusive).
 // It panics if  upper <= lower.
-func I64Between(lower int64, upper int64) int64 {
-	return rand.Int63n(upper-lower) + lower
+func I64Between[T constraints.Integer](lower T, upper T) int64 {
+	return rand.Int63n(int64(upper-lower)) + int64(lower)
 }
 
 // I64Gen represents an random integer generator to generate a sequence of integers with the same properties.
@@ -44,7 +46,7 @@ func PInt64Gen() I64Gen {
 
 // I64GenBetween returns a random integer generator for numbers between lower (inclusive) and upper (exclusive).
 // It panics if  upper <= lower.
-func I64GenBetween(lower int64, upper int64) I64Gen {
+func I64GenBetween[T constraints.Integer](lower T, upper T) I64Gen {
 	return I64Gen{gen: func() int64 { return I64Between(lower, upper) }}
 }
 
@@ -76,17 +78,17 @@ func (g I64Gen) Next() int64 {
 }
 
 // Bytes returns a random slice of bytes of the specified length
-func Bytes(len int) []byte {
+func Bytes[T constraints.Integer](len T) []byte {
 	bz := make([]byte, len)
-	for i, b := range I64GenBetween(0, 256).Take(len) {
+	for i, b := range I64GenBetween(0, 256).Take(int(len)) {
 		bz[i] = byte(b)
 	}
 	return bz
 }
 
 // BytesBetween returns a random byte slice of random length in the given limits (inclusive)
-func BytesBetween(minLength int, maxLength int) []byte {
-	length := int(I64Between(int64(minLength), int64(maxLength+1)))
+func BytesBetween[T constraints.Integer](minLength T, maxLength T) []byte {
+	length := int(I64Between(minLength, maxLength+1))
 	bz := make([]byte, length)
 	for i, b := range I64GenBetween(0, 256).Take(length) {
 		bz[i] = byte(b)
@@ -127,7 +129,7 @@ type DistrGen struct {
 }
 
 // Distr generates a new probability distribution with n states of random probability
-func Distr(n int) DistrGen {
+func Distr[T constraints.Integer](n T) DistrGen {
 	if n < 1 {
 		panic("at least one state necessary")
 	}
@@ -139,7 +141,7 @@ func Distr(n int) DistrGen {
 	if resolution*int64(n) > maxInt32 {
 		panic("decrease either number of states or resolution")
 	}
-	for _, n := range I64GenBetween(1, resolution*int64(n)).Take(n) {
+	for _, n := range I64GenBetween(1, resolution*int64(n)).Take(int(n)) {
 		gen.total += n
 		gen.states = append(gen.states, gen.total)
 	}
@@ -183,71 +185,71 @@ type StringGen struct {
 }
 
 // Strings returns a random string generator that produces strings from the default alphabet of random length in the given limits (inclusive)
-func Strings(minLength int, maxLength int) StringGen {
+func Strings[T constraints.Integer](minLength T, maxLength T) StringGen {
 	alphabet := []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_.:")
 	return StringGen{
-		lengthGen:  I64GenBetween(int64(minLength), int64(maxLength+1)),
+		lengthGen:  I64GenBetween(minLength, maxLength+1),
 		alphabet:   alphabet,
 		charPicker: I64GenBetween(0, int64(len(alphabet))),
 	}
 }
 
 // AlphaStrings returns a random string generator that produces strings from the alphabetical characters of random length in the given limits (inclusive)
-func AlphaStrings(minLength int, maxLength int) StringGen {
+func AlphaStrings[T constraints.Integer](minLength T, maxLength T) StringGen {
 	alphabet := []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
 	return StringGen{
-		lengthGen:  I64GenBetween(int64(minLength), int64(maxLength+1)),
+		lengthGen:  I64GenBetween(minLength, maxLength+1),
 		alphabet:   alphabet,
-		charPicker: I64GenBetween(0, int64(len(alphabet))),
+		charPicker: I64GenBetween(0, len(alphabet)),
 	}
 }
 
 // AlphaNumericStrings returns a random string generator that produces strings from the alphanumeric characters of random length in the given limits (inclusive)
-func AlphaNumericStrings(minLength int, maxLength int) StringGen {
+func AlphaNumericStrings[T constraints.Integer](minLength T, maxLength T) StringGen {
 	alphabet := []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789")
 	return StringGen{
-		lengthGen:  I64GenBetween(int64(minLength), int64(maxLength+1)),
+		lengthGen:  I64GenBetween(minLength, maxLength+1),
 		alphabet:   alphabet,
-		charPicker: I64GenBetween(0, int64(len(alphabet))),
+		charPicker: I64GenBetween(0, len(alphabet)),
 	}
 }
 
 // HexStrings returns a random hex string generator that produces hex strings with given length
-func HexStrings(length int) StringGen {
+func HexStrings[T constraints.Integer](length T) StringGen {
 	alphabet := []rune("0123456789abcdef")
 
 	return StringGen{
-		lengthGen:  I64GenBetween(int64(length), int64(length+1)),
+		lengthGen:  I64GenBetween(length, length+1),
 		alphabet:   alphabet,
-		charPicker: I64GenBetween(0, int64(len(alphabet))),
+		charPicker: I64GenBetween(0, len(alphabet)),
 	}
 }
 
 // StrBetween returns a random string of random length in the given limits (inclusive)
-func StrBetween(minLength int, maxLength int) string {
+func StrBetween[T constraints.Integer](minLength T, maxLength T) string {
 	g := Strings(minLength, maxLength)
 	return g.Next()
 }
 
 // AlphaStrBetween returns a random alphabetical string of random length in the given limits (inclusive)
-func AlphaStrBetween(minLength int, maxLength int) string {
+func AlphaStrBetween[T constraints.Integer](minLength T, maxLength T) string {
 	g := AlphaStrings(minLength, maxLength)
 	return g.Next()
 }
 
 // AlphaNumericStrBetween returns a random alphanumeric string of random length in the given limits (inclusive)
-func AlphaNumericStrBetween(minLength int, maxLength int) string {
+func AlphaNumericStrBetween[T constraints.Integer](minLength T, maxLength T) string {
 	g := AlphaNumericStrings(minLength, maxLength)
 	return g.Next()
 }
 
 // Str returns a random string of given length
-func Str(len int) string {
+func Str[T constraints.Integer](len T) string {
 	return StrBetween(len, len)
 }
 
 // HexStr returns a random hex string of given length
-func HexStr(len int) string {
+func HexStr[T constraints.Integer](len T) string {
 	return HexStrings(len).Next()
 }
 
