@@ -65,7 +65,7 @@ func All[T any](source []T, predicate func(T) bool) bool {
 
 // Flatten flattens a slice of slices into a single slice
 func Flatten[T any](source [][]T) []T {
-	out := make([]T, 0, cap(source))
+	out := make([]T, 0)
 
 	for i := range source {
 		for j := range source[i] {
