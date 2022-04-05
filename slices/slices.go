@@ -76,3 +76,13 @@ func Flatten[T any](source [][]T) []T {
 
 	return out
 }
+
+// Expand creates a slice by executing the generator function count times
+func Expand[T any](generator func(idx int) T, count int) []T {
+	out := make([]T, 0, count)
+
+	for i := 0; i < count; i++ {
+		out = append(out, generator(i))
+	}
+	return out
+}

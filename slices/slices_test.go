@@ -1,6 +1,7 @@
 package slices
 
 import (
+	"strconv"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -101,4 +102,10 @@ func TestFlatten(t *testing.T) {
 	for _, i := range f {
 		assert.Equal(t, i, f[i])
 	}
+}
+
+func TestExpand(t *testing.T) {
+	out := Expand(func(idx int) string { return strconv.Itoa(idx) }, 5)
+
+	assert.Equal(t, []string{"0", "1", "2", "3", "4"}, out)
 }
