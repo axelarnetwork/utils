@@ -2,11 +2,11 @@ package slices
 
 // Map maps a slice of T to a slice of S
 func Map[T, S any](source []T, f func(T) S) []S {
-	out := make([]S, 0, cap(source))
+	out := make([]S, cap(source))
 
 	// avoid allocating a copy of the slice element
 	for i := range source {
-		out = append(out, f(source[i]))
+		out[i] = f(source[i])
 	}
 
 	return out
@@ -65,9 +65,8 @@ func All[T any](source []T, predicate func(T) bool) bool {
 
 // Flatten flattens a slice of slices into a single slice
 func Flatten[T any](source [][]T) []T {
-	out := make([]T, 0, cap(source))
+	out := make([]T, 0)
 
-	// avoid allocating a copy of the slice element
 	for i := range source {
 		for j := range source[i] {
 			out = append(out, source[i][j])
@@ -79,10 +78,10 @@ func Flatten[T any](source [][]T) []T {
 
 // Expand creates a slice by executing the generator function count times
 func Expand[T any](generator func(idx int) T, count int) []T {
-	out := make([]T, 0, count)
+	out := make([]T, count)
 
 	for i := 0; i < count; i++ {
-		out = append(out, generator(i))
+		out[i] = generator(i)
 	}
 	return out
 }

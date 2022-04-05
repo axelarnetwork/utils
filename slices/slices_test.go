@@ -105,7 +105,7 @@ func TestFlatten(t *testing.T) {
 }
 
 func TestExpand(t *testing.T) {
-	out := Expand(func(idx int) string { return strconv.Itoa(idx) }, 5)
+	out := Expand(strconv.Itoa, 5)
 
 	assert.Equal(t, []string{"0", "1", "2", "3", "4"}, out)
 }
