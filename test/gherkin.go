@@ -31,6 +31,11 @@ type ThenStatement interface {
 	Then(description string, execution func(t *testing.T)) Runner
 }
 
+// ForEachStatement is used to create a set of tests for each of the test case items
+type ForEachStatement[T any] interface {
+	ForEach(createRunner func(testCase T) Runner) Runner
+}
+
 // Runner executes the test - do not implement yourself
 type Runner interface {
 	Run(t *testing.T, repeats ...int) bool
@@ -49,6 +54,10 @@ type when struct {
 type then struct {
 	label []string
 	test  []func(t *testing.T)
+}
+
+type testCases[T any] struct {
+	items []T
 }
 
 type multiRunner struct {
@@ -81,6 +90,13 @@ func Then(description string, setup func(t *testing.T)) Runner {
 	return runner{
 		label: []string{_then, description},
 		test:  []func(t *testing.T){setup},
+	}
+}
+
+// TestCases takes an array of arbitrary items to then generate a test for each of the test case items
+func TestCases[T any](items []T) ForEachStatement[T] {
+	return testCases[T]{
+		items: items,
 	}
 }
 
@@ -134,6 +150,18 @@ func (t then) Then(description string, execution func(t *testing.T)) Runner {
 		label: append(t.label, _then, description),
 		test:  append(t.test, execution),
 	}
+}
+
+// ForEach generates a test for each test case
+func (tc testCases[T]) ForEach(createRunner func(testCase T) Runner) Runner {
+
+	runners := make([]Runner, len(tc.items))
+
+	for i, v := range tc.items {
+		runners[i] = createRunner(v)
+	}
+
+	return branch([]string{}, []func(t *testing.T){}, runners)
 }
 
 // Run executes all defined test paths. Optionally, each path is repeated a given number of times
@@ -213,8 +241,9 @@ func concatRunner(startLabel []string, startTest []func(t *testing.T), r runner)
 
 func mergeLabels(startLabel, endLabel []string) []string {
 	label := startLabel
+	startLabelLength := len(startLabel)
 	// second last word is always the last action word
-	if startLabel[len(startLabel)-2] == endLabel[0] {
+	if startLabelLength >= 2 && startLabel[startLabelLength-2] == endLabel[0] {
 		label = append(label, _and)
 	}
 	return append(label, endLabel...)
