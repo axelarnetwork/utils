@@ -243,7 +243,7 @@ func mergeLabels(startLabel, endLabel []string) []string {
 	label := startLabel
 	startLabelLength := len(startLabel)
 	// second last word is always the last action word
-	if startLabelLength > 0 && startLabel[startLabelLength-2] == endLabel[0] {
+	if startLabelLength >= 2 && startLabel[startLabelLength-2] == endLabel[0] {
 		label = append(label, _and)
 	}
 	return append(label, endLabel...)
