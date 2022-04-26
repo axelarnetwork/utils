@@ -43,6 +43,15 @@ func ForEach[T any](source []T, f func(T)) {
 	}
 }
 
+// While executes the given function on every element of the slice until the function returns false
+func While[T any](source []T, f func(T) bool) {
+	for i := range source {
+		if ok := f(source[i]); !ok {
+			return
+		}
+	}
+}
+
 // Any tests if any of the elements of the slice match the predicate
 func Any[T any](source []T, predicate func(T) bool) bool {
 	for i := range source {
