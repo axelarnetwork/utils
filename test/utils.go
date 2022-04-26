@@ -10,6 +10,8 @@ import (
 	"testing"
 
 	abci "github.com/tendermint/tendermint/abci/types"
+
+	"github.com/axelarnetwork/utils/slices"
 )
 
 // Func wraps a regular testing function so it can be used as a pointer function receiver
@@ -47,6 +49,23 @@ func (tc TestCases[T]) ForEach(f func(t *testing.T, testCase T)) Func {
 			}
 		}
 	}
+}
+
+func (tc TestCases[T]) Map(f func(testCase T) Runner) Runner {
+	runners := slices.Map(tc, f)
+	var out ThenStatements
+
+	for _, runner := range runners {
+		switch runner := runner.(type) {
+		case ThenStatement:
+			out = append(out, runner)
+		case ThenStatements:
+			for _, then := range runner {
+				out = append(out, then)
+			}
+		}
+	}
+	return out
 }
 
 // Events wraps sdk.Events

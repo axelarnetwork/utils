@@ -26,13 +26,17 @@ type WhenStatement struct {
 	test  func()
 }
 
-type thenStatement struct {
+type ThenStatement struct {
 	label []string
 	test  func(t *testing.T)
 }
 
+type Runner interface {
+	Run(t *testing.T, repeats ...int) bool
+}
+
 // ThenStatements are used to define test outcomes
-type ThenStatements []thenStatement
+type ThenStatements []ThenStatement
 
 // Given starts the test with the first precondition
 func Given(description string, setup func()) GivenStatement {
@@ -51,11 +55,11 @@ func When(description string, setup func()) WhenStatement {
 }
 
 // Then is an independent outcome check that can be used to start a statement in a Branch
-func Then(description string, setup func(t *testing.T)) ThenStatements {
-	return []thenStatement{{
+func Then(description string, setup func(t *testing.T)) ThenStatement {
+	return ThenStatement{
 		label: []string{_then, description},
 		test:  setup,
-	}}
+	}
 }
 
 // Given adds an additional precondition
@@ -91,39 +95,53 @@ func (g GivenStatement) When2(w WhenStatement) WhenStatement {
 }
 
 // Branch allows test branching by adding multiple sub-statements after a Given
-func (g GivenStatement) Branch(thens ...ThenStatements) ThenStatements {
-	slices.ForEach(thens, func(thens ThenStatements) { checkFirstWordOfLabels(thens, assertNotTHEN) })
-
+func (g GivenStatement) Branch(runners ...Runner) Runner {
 	out := ThenStatements{}
-	for _, then := range thens {
-		for _, statement := range then {
-			statement := statement
-			out = append(out, thenStatement{
-				label: mergeLabels(g.label, statement.label),
-				test:  func(t *testing.T) { g.test(); statement.test(t) },
-			})
+	for _, runner := range runners {
+		switch runner := runner.(type) {
+		case ThenStatement:
+			out = append(out, g.merge(runner))
+		case ThenStatements:
+			for _, then := range runner {
+				out = append(out, g.merge(then))
+			}
 		}
 	}
 
 	return out
 }
 
-// Branch allows test branching by adding multiple sub-statements after a When
-func (w WhenStatement) Branch(thens ...ThenStatements) ThenStatements {
-	slices.ForEach(thens, func(thens ThenStatements) { checkFirstWordOfLabels(thens, assertNotGIVEN) })
+func (g GivenStatement) merge(then ThenStatement) ThenStatement {
+	checkFirstWordOfLabel(then, assertNotTHEN)
+	return ThenStatement{
+		label: mergeLabels(g.label, then.label),
+		test:  func(t *testing.T) { g.test(); then.test(t) },
+	}
+}
 
+// Branch allows test branching by adding multiple sub-statements after a When
+func (w WhenStatement) Branch(runners ...Runner) Runner {
 	out := ThenStatements{}
-	for _, then := range thens {
-		for _, statement := range then {
-			statement := statement
-			out = append(out, thenStatement{
-				label: mergeLabels(w.label, statement.label),
-				test:  func(t *testing.T) { w.test(); statement.test(t) },
-			})
+	for _, runner := range runners {
+		switch runner := runner.(type) {
+		case ThenStatement:
+			out = append(out, w.merge(runner))
+		case ThenStatements:
+			for _, then := range runner {
+				out = append(out, w.merge(then))
+			}
 		}
 	}
 
 	return out
+}
+
+func (w WhenStatement) merge(then ThenStatement) ThenStatement {
+	checkFirstWordOfLabel(then, assertNotGIVEN)
+	return ThenStatement{
+		label: mergeLabels(w.label, then.label),
+		test:  func(t *testing.T) { w.test(); then.test(t) },
+	}
 }
 
 // When adds a trigger to the test path
@@ -143,25 +161,31 @@ func (w WhenStatement) When2(w2 WhenStatement) WhenStatement {
 }
 
 // Then adds an outcome check to the test path
-func (w WhenStatement) Then(description string, execution func(t *testing.T)) ThenStatements {
-	return []thenStatement{{
+func (w WhenStatement) Then(description string, execution func(t *testing.T)) ThenStatement {
+	return ThenStatement{
 		label: append(w.label, _then, description),
 		test:  func(t *testing.T) { w.test(); execution(t) },
-	}}
+	}
 }
 
 // Then2 allows the use of a previously defined Then statement
-func (w WhenStatement) Then2(then ThenStatements) ThenStatements {
-	return slices.Map(then, func(then thenStatement) thenStatement {
-		return thenStatement{
-			label: mergeLabels(w.label, then.label),
-			test:  func(t *testing.T) { w.test(); then.test(t) },
-		}
-	})
+func (w WhenStatement) Then2(then ThenStatement) ThenStatement {
+	return ThenStatement{
+		label: mergeLabels(w.label, then.label),
+		test:  func(t *testing.T) { w.test(); then.test(t) },
+	}
+}
+
+// Then adds an outcome check to the test path
+func (then ThenStatement) Then(description string, execution func(t *testing.T)) ThenStatement {
+	return ThenStatement{
+		label: append(then.label, _and, _then, description),
+		test:  func(t *testing.T) { then.test(t); execution(t) },
+	}
 }
 
 // Run executes all defined test paths. Optionally, each path is repeated a given number of times
-func (then thenStatement) Run(t *testing.T, repeats ...int) bool {
+func (then ThenStatement) Run(t *testing.T, repeats ...int) bool {
 	repeat := 1
 	if len(repeats) == 1 && repeats[0] > 1 {
 		repeat = repeats[0]
@@ -171,7 +195,7 @@ func (then thenStatement) Run(t *testing.T, repeats ...int) bool {
 
 // Run executes all defined test paths. Optionally, each path is repeated a given number of times
 func (thens ThenStatements) Run(t *testing.T, repeats ...int) bool {
-	return slices.Reduce(thens, true, func(result bool, then thenStatement) bool { return then.Run(t, repeats...) })
+	return slices.Reduce(thens, true, func(result bool, then ThenStatement) bool { return then.Run(t, repeats...) })
 }
 
 func assertNotGIVEN(label string) {
@@ -186,10 +210,8 @@ func assertNotTHEN(label string) {
 	}
 }
 
-func checkFirstWordOfLabels(tests []thenStatement, assertion func(string)) {
-	for _, test := range tests {
-		assertion(test.label[0])
-	}
+func checkFirstWordOfLabel(test ThenStatement, assertion func(string)) {
+	assertion(test.label[0])
 }
 
 func mergeLabels(startLabel, endLabel []string) []string {
