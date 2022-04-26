@@ -26,16 +26,18 @@ type WhenStatement struct {
 	test  func()
 }
 
+// ThenStatement is used to define test assertions
 type ThenStatement struct {
 	label []string
 	test  func(t *testing.T)
 }
 
+// Runner combines ThenStatement and ThenStatements, this should not be implemented outside of this package!
 type Runner interface {
 	Run(t *testing.T, repeats ...int) bool
 }
 
-// ThenStatements are used to define test outcomes
+// ThenStatements is used as an alias for multiple ThenStatement
 type ThenStatements []ThenStatement
 
 // Given starts the test with the first precondition
