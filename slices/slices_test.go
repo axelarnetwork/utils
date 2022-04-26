@@ -109,3 +109,14 @@ func TestExpand(t *testing.T) {
 
 	assert.Equal(t, []string{"0", "1", "2", "3", "4"}, out)
 }
+
+func TestWhile(t *testing.T) {
+	source := []int{1, 2, 3, 4, 5, 6, 7}
+	sum := 0
+	While(source, func(i int) bool {
+		sum += i
+		return sum < 10
+	})
+
+	assert.Equal(t, 10, sum)
+}
