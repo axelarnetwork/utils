@@ -7,9 +7,10 @@ import (
 	"testing"
 	"time"
 
+	"github.com/stretchr/testify/assert"
+
 	"github.com/axelarnetwork/utils/jobs"
 	. "github.com/axelarnetwork/utils/test"
-	"github.com/stretchr/testify/assert"
 
 	"github.com/axelarnetwork/utils/test/rand"
 )
@@ -20,10 +21,10 @@ func TestJobManager_Errs(t *testing.T) {
 		jobCount int64
 	)
 
-	Given("a job manager", func(t *testing.T) {
+	Given("a job manager", func() {
 		mgr = jobs.NewMgr(context.Background())
 	}).
-		When("adding jobs that fail", func(t *testing.T) {
+		When("adding jobs that fail", func() {
 			jobCount = rand.I64Between(0, 100)
 			for i := int64(0); i < jobCount; i++ {
 				job := func(ctx context.Context) error {
@@ -41,11 +42,11 @@ func TestJobManager_Errs(t *testing.T) {
 		errorCacheSize int64
 	)
 
-	Given("a job manager with small error cache", func(t *testing.T) {
+	Given("a job manager with small error cache", func() {
 		errorCacheSize = rand.I64Between(1, 20)
 		mgr = jobs.NewMgr(context.Background(), jobs.WithErrorCacheCapacity(errorCacheSize))
 	}).
-		When("more jobs are managed", func(t *testing.T) {
+		When("more jobs are managed", func() {
 			jobCount = rand.I64Between(errorCacheSize, 100)
 			for i := int64(0); i < jobCount; i++ {
 				job := func(ctx context.Context) error {
@@ -63,12 +64,12 @@ func TestJobManager_Errs(t *testing.T) {
 		cancel context.CancelFunc
 	)
 
-	Given("a job manager with cancellable context", func(t *testing.T) {
+	Given("a job manager with cancellable context", func() {
 		var ctx context.Context
 		ctx, cancel = context.WithCancel(context.Background())
 		mgr = jobs.NewMgr(ctx)
 	}).Branch(
-		When("blocking jobs are added", func(t *testing.T) {
+		When("blocking jobs are added", func() {
 			jobCount = rand.I64Between(0, 100)
 			for i := 0; i < int(jobCount); i++ {
 				mgr.AddJob(func(ctx context.Context) error {
@@ -97,7 +98,7 @@ func TestJobManager_Errs(t *testing.T) {
 					assert.Fail(t, "timed out")
 				}
 			}),
-		When("jobs are added after the context is cancelled", func(t *testing.T) {
+		When("jobs are added after the context is cancelled", func() {
 			cancel()
 
 			jobCount = rand.I64Between(0, 100)
@@ -126,13 +127,13 @@ func TestJobManager_Errs(t *testing.T) {
 		unblockJobs context.CancelFunc
 	)
 
-	Given("a capacity limited job manager", func(t *testing.T) {
+	Given("a capacity limited job manager", func() {
 		var ctx context.Context
 		ctx, cancel = context.WithCancel(context.Background())
 		capacity = rand.I64Between(1, 20)
 		mgr = jobs.NewMgr(ctx, jobs.WithMaxCapacity(capacity))
 	}).
-		When("more blocking jobs than capacity are added", func(t *testing.T) {
+		When("more blocking jobs than capacity are added", func() {
 			jobCount = rand.I64Between(capacity, 100)
 
 			// use this context to prevent the jobs from immediately completing
