@@ -66,6 +66,7 @@ func (g GivenStatement) Given(description string, setup func()) GivenStatement {
 	}
 }
 
+// Given2 allows the usage of a previously defined Given statement
 func (g GivenStatement) Given2(g2 GivenStatement) GivenStatement {
 	return GivenStatement{
 		label: mergeLabels(g.label, g2.label),
@@ -81,6 +82,7 @@ func (g GivenStatement) When(description string, setup func()) WhenStatement {
 	}
 }
 
+// When2 allows the usage of a previously defined When statement
 func (g GivenStatement) When2(w WhenStatement) WhenStatement {
 	return WhenStatement{
 		label: mergeLabels(g.label, w.label),
@@ -132,6 +134,7 @@ func (w WhenStatement) When(description string, setup func()) WhenStatement {
 	}
 }
 
+// When2 allows the usage of a previously defined When statement
 func (w WhenStatement) When2(w2 WhenStatement) WhenStatement {
 	return WhenStatement{
 		label: mergeLabels(w.label, w2.label),
@@ -147,7 +150,7 @@ func (w WhenStatement) Then(description string, execution func(t *testing.T)) Th
 	}}
 }
 
-// Then2 allows the use of a previously defined "then" statement
+// Then2 allows the use of a previously defined Then statement
 func (w WhenStatement) Then2(then ThenStatements) ThenStatements {
 	return slices.Map(then, func(then thenStatement) thenStatement {
 		return thenStatement{

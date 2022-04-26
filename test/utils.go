@@ -24,6 +24,31 @@ func (f Func) Repeat(n int) Func {
 	}
 }
 
+// Run is equivalent to calling f(t), it just provides an interface that reads better
+func (f Func) Run(t *testing.T) {
+	f(t)
+}
+
+// TestCases define alternative test setups that should all be tested
+type TestCases[T any] []T
+
+// AsTestCases is defined for convenience of casting a slice to TestCases
+func AsTestCases[T any](cases ...T) TestCases[T] {
+	return cases
+}
+
+// ForEach defines the test that should be run on each test case
+func (tc TestCases[T]) ForEach(f func(t *testing.T, testCase T)) Func {
+	return func(t *testing.T) {
+		for _, testCase := range tc {
+			f(t, testCase)
+			if t.Failed() {
+				return
+			}
+		}
+	}
+}
+
 // Events wraps sdk.Events
 type Events []abci.Event
 
@@ -51,7 +76,7 @@ func (ec *ErrorCache) Errorf(format string, args ...interface{}) {
 // SetEnv safely sets an OS env var to the specified value and resets it to the original value upon test closure
 func SetEnv(t *testing.T, key string, val string) {
 	// TODO : enable with Go 1.17 >> it will automatically handle Cleanup
-	//t.Setenv(key, val)
+	// t.Setenv(key, val)
 	orig := os.Getenv(key)
 	os.Setenv(key, val)
 	t.Cleanup(func() { os.Setenv(key, orig) })

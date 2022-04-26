@@ -1,7 +1,6 @@
 package testutils_test
 
 import (
-	"fmt"
 	"strings"
 	"testing"
 
@@ -38,15 +37,6 @@ func TestGherkinSyntax(t *testing.T) {
 					assertNameEquals(t, testLabel)
 					testPaths++
 				}),
-			TestCases([]int16{1, 2, 3}).ForEach(func(tc int16) Runner {
-				description := fmt.Sprintf("test case %v", tc)
-				return When(description, func(t *testing.T) { testLabel += fmt.Sprintf(" WHEN %s", description) }).
-					Then("we check outcome for test case", func(t *testing.T) {
-						testLabel += " THEN we check outcome for test case"
-						assertNameEquals(t, testLabel)
-						testPaths++
-					})
-			}),
 		)
 
 	testSetup.Run(t)
