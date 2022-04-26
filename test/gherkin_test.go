@@ -40,12 +40,12 @@ func TestGherkinSyntax(t *testing.T) {
 		)
 
 	testSetup.Run(t)
-	assert.Equal(t, 6, testPaths)
+	assert.Equal(t, 3, testPaths)
 
 	// do the same execution again, so tests will end in "#01"
 	testPaths = 0
 	testSetup.Run(t, 15)
-	assert.Equal(t, 6*15, testPaths)
+	assert.Equal(t, 3*15, testPaths)
 }
 
 func TestGherkinPanicsGIVENAfterWHEN(t *testing.T) {
