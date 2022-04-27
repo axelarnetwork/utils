@@ -3,6 +3,8 @@ package testutils_test
 import (
 	"testing"
 
+	"github.com/stretchr/testify/assert"
+
 	testutils "github.com/axelarnetwork/utils/test"
 )
 
@@ -15,5 +17,5 @@ func TestTestCases(t *testing.T) {
 			}).
 		Run(t)
 
-	sum = 0
+	assert.Equal(t, 6, sum)
 }
