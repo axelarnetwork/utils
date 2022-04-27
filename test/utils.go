@@ -44,9 +44,6 @@ func (tc TestCases[T]) ForEach(f func(t *testing.T, testCase T)) Func {
 	return func(t *testing.T) {
 		for _, testCase := range tc {
 			f(t, testCase)
-			if t.Failed() {
-				return
-			}
 		}
 	}
 }
