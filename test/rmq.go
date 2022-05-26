@@ -17,6 +17,7 @@ type RMQFake struct {
 	stopLock *sync.RWMutex
 }
 
+// NewRMQFake returns a new fake RMQ broker that acts both as publisher and consumer
 func NewRMQFake() RMQFake {
 	return RMQFake{
 		bindings: make(map[string][]string),
@@ -26,6 +27,7 @@ func NewRMQFake() RMQFake {
 	}
 }
 
+// StartConsuming creates a new goroutine where the handler consumes msgs from the queue. The queue is created if it doesn't exist
 func (fake *RMQFake) StartConsuming(handler rabbitmq.Handler, queue string, routingKeys []string, _ ...func(options *rabbitmq.ConsumeOptions)) {
 	for _, key := range routingKeys {
 		queues := fake.bindings[key]
@@ -53,6 +55,7 @@ func (fake *RMQFake) StartConsuming(handler rabbitmq.Handler, queue string, rout
 	}()
 }
 
+// Publish publishes the given data to the queues bound to the routing keys. Msg is lost of no queue is bound to the keys
 func (fake *RMQFake) Publish(data []byte, routingKeys []string, optionFuncs ...func(options *rabbitmq.PublishOptions)) {
 	fake.stopLock.RLock()
 	defer fake.stopLock.RUnlock()
@@ -98,6 +101,7 @@ func (fake *RMQFake) Publish(data []byte, routingKeys []string, optionFuncs ...f
 	}
 }
 
+// StopConsuming stops msg deliveries to queues
 func (fake *RMQFake) StopConsuming() {
 	fake.stopLock.Lock()
 	defer fake.stopLock.Unlock()
