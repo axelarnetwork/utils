@@ -5,8 +5,10 @@ go 1.18
 require (
 	github.com/cosmos/cosmos-sdk v0.45.4
 	github.com/matryer/moq v0.2.7
+	github.com/rabbitmq/amqp091-go v1.3.4
 	github.com/stretchr/testify v1.7.1
 	github.com/tendermint/tendermint v0.34.19
+	github.com/wagslane/go-rabbitmq v0.10.0
 	golang.org/x/exp v0.0.0-20220428152302-39d4317da171
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c
 )
