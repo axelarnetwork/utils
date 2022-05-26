@@ -10,6 +10,7 @@ import (
 	slices2 "github.com/axelarnetwork/utils/slices"
 )
 
+// RMQFake is a fake RMQ broker that acts both as publisher and consumer
 type RMQFake struct {
 	bindings map[string][]string
 	queues   map[string]chan rabbitmq.Delivery
@@ -17,7 +18,7 @@ type RMQFake struct {
 	stopLock *sync.RWMutex
 }
 
-// NewRMQFake returns a new fake RMQ broker that acts both as publisher and consumer
+// NewRMQFake returns a new RMQFake
 func NewRMQFake() RMQFake {
 	return RMQFake{
 		bindings: make(map[string][]string),
