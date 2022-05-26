@@ -120,3 +120,8 @@ func TestWhile(t *testing.T) {
 
 	assert.Equal(t, 10, sum)
 }
+
+func TestDistinct(t *testing.T) {
+	out := Distinct([]int{0, 3, 2, 7, 2, 1, 3, 0})
+	assert.Equal(t, []int{0, 3, 2, 7, 1}, out)
+}
