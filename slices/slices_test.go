@@ -125,3 +125,15 @@ func TestDistinct(t *testing.T) {
 	out := Distinct([]int{0, 3, 2, 7, 2, 1, 3, 0})
 	assert.Equal(t, []int{0, 3, 2, 7, 1}, out)
 }
+
+func TestToMap(t *testing.T) {
+	source := []int{0, 3, 2, 7, 3}
+	m := ToMap(source, strconv.Itoa)
+	assert.Len(t, m, 4)
+	assert.Equal(t, 0, m["0"])
+	assert.Equal(t, 2, m["2"])
+	assert.Equal(t, 3, m["3"])
+	assert.Equal(t, 7, m["7"])
+
+	assert.Panics(t, func() { ToMap(source, strconv.Itoa, true) })
+}

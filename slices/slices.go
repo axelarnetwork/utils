@@ -1,5 +1,7 @@
 package slices
 
+import "fmt"
+
 // Map maps a slice of T to a slice of S
 func Map[T, S any](source []T, f func(T) S) []S {
 	out := make([]S, len(source))
@@ -110,4 +112,28 @@ func Distinct[T comparable](source []T) []T {
 	}
 
 	return out
+}
+
+// ToMap returns a map from the given slice with keys associated by the lookup function. Panics if strictUniqueness is set, otherwise overrides values for colliding keys.
+func ToMap[T1 any, T2 comparable](source []T1, lookup func(T1) T2, strictUniqueness ...bool) map[T2]T1 {
+	m := make(map[T2]T1, len(source))
+
+	strict := false
+	if len(strictUniqueness) > 0 {
+		strict = strictUniqueness[0]
+	}
+
+	for i := range source {
+		key := lookup(source[i])
+		if strict {
+			// separate the conditions so the lookup is only done if strict flag is set
+			if value, ok := m[key]; ok {
+				panic(fmt.Sprintf("key %v is not unique, points to %v and %v", key, value, source[i]))
+			}
+		}
+
+		m[key] = source[i]
+	}
+
+	return m
 }
