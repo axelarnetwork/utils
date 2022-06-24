@@ -322,3 +322,8 @@ func ValAddr() sdk.ValAddress {
 func AccAddr() sdk.AccAddress {
 	return Bytes(address.Len)
 }
+
+// Time generates a random time
+func Time() time.Time {
+	return time.Time{}.Add(time.Duration(PosI64()))
+}
