@@ -13,3 +13,7 @@ func TestCompose(t *testing.T) {
 
 	assert.False(t, h("hello"))
 }
+
+func TestIdentity(t *testing.T) {
+	assert.Equal(t, "a", Identity("a"))
+}
