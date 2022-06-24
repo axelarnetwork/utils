@@ -124,3 +124,11 @@ func TestRandomAddress(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, address1, address2)
 }
+
+func TestRandomTime(t *testing.T) {
+	assert.NotPanics(t, func() {
+		for i := 0; i < 1000; i++ {
+			Time()
+		}
+	})
+}
