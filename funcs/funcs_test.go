@@ -26,3 +26,10 @@ func TestMust(t *testing.T) {
 	assert.Equal(t, 9, Must(withResult()))
 	assert.Panics(t, func() { Must(withErr()) })
 }
+
+func TestMustNoErr(t *testing.T) {
+	assert.NotPanics(t, func() {
+		MustNoErr(nil)
+	})
+	assert.Panics(t, func() { MustNoErr(errors.New("some error")) })
+}
