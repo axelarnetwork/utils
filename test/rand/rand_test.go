@@ -132,3 +132,12 @@ func TestRandomTime(t *testing.T) {
 		}
 	})
 }
+
+func TestSamle(t *testing.T) {
+	source := []int{1, 2, 3, 4, 5}
+
+	assert.ElementsMatch(t, source, Sample(source, 5, false))
+	assert.Subset(t, source, Sample(source, 3, false))
+
+	assert.Subset(t, source, Sample(source, 7, true))
+}

@@ -327,3 +327,31 @@ func AccAddr() sdk.AccAddress {
 func Time() time.Time {
 	return time.Time{}.Add(time.Duration(PosI64()))
 }
+
+func Sample[T1 any, T2 constraints.Integer](source []T1, count T2, withRedraw ...bool) []T1 {
+	out := make([]T1, count)
+	var in []T1
+
+	redraw := false
+	if len(withRedraw) > 0 {
+		redraw = withRedraw[0]
+	}
+
+	if redraw {
+		copy(in, source)
+	} else {
+		in = source
+	}
+
+	maxLen := len(source)
+	for i := 0; i < int(count); i++ {
+		index := rand.Intn(maxLen)
+		out[i] = in[index]
+		if !redraw {
+			in[len(in)-i-1], in[index] = in[index], in[len(in)-i-1]
+			maxLen--
+		}
+	}
+
+	return out
+}
