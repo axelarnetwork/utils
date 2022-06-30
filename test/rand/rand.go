@@ -328,6 +328,8 @@ func Time() time.Time {
 	return time.Time{}.Add(time.Duration(PosI64()))
 }
 
+// Sample returns a new slice with a uniform sample of elements from the source slice.
+// If withRedraw is true, the same element can be chosen multiple times.
 func Sample[T1 any, T2 constraints.Integer](source []T1, count T2, withRedraw ...bool) []T1 {
 	out := make([]T1, count)
 	var in []T1
@@ -338,6 +340,10 @@ func Sample[T1 any, T2 constraints.Integer](source []T1, count T2, withRedraw ..
 	}
 
 	if !redraw {
+		if int(count) > len(source) {
+			panic("count cannot be greater than the length of the source slice when redraw is not enabled")
+		}
+
 		in = make([]T1, len(source))
 		copy(in, source)
 	} else {
