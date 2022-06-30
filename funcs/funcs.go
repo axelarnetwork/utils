@@ -20,3 +20,10 @@ func Must[T any](result T, err error) T {
 
 	return result
 }
+
+// MustNoErr panics if err is not nil
+func MustNoErr(err error) {
+	if err != nil {
+		panic(errors.Wrap(err, "call should not have failed"))
+	}
+}
