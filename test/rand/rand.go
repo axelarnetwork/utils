@@ -337,7 +337,8 @@ func Sample[T1 any, T2 constraints.Integer](source []T1, count T2, withRedraw ..
 		redraw = withRedraw[0]
 	}
 
-	if redraw {
+	if !redraw {
+		in = make([]T1, len(source))
 		copy(in, source)
 	} else {
 		in = source

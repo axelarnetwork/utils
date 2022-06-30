@@ -133,7 +133,7 @@ func TestRandomTime(t *testing.T) {
 	})
 }
 
-func TestSamle(t *testing.T) {
+func TestSample(t *testing.T) {
 	source := []int{1, 2, 3, 4, 5}
 
 	assert.ElementsMatch(t, source, Sample(source, 5, false))
