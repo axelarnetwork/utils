@@ -15,5 +15,9 @@ func TestCached(t *testing.T) {
 
 	valFromRand := wrapper.NewCached(func() string { return rand.Str(10) })
 
-	assert.Equal(t, valFromRand.Value(), valFromRand.Value())
+	cachedValue := valFromRand.Value()
+	assert.Equal(t, cachedValue, valFromRand.Value())
+
+	valFromRand.Clear()
+	assert.NotEqual(t, cachedValue, valFromRand.Value())
 }

@@ -22,3 +22,7 @@ func (c *Cached[T]) Value() T {
 
 	return c.value
 }
+
+func (c *Cached[T]) Clear() {
+	c.isSet = false
+}
