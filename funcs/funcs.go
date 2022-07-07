@@ -27,3 +27,39 @@ func MustNoErr(err error) {
 		panic(errors.Wrap(err, "call should not have failed"))
 	}
 }
+
+// Not returns a new predicate function that would return true if the given
+// predicate function returns false; false otherwise
+func Not[T any](predicateFunc func(T) bool) func(T) bool {
+	return func(t T) bool {
+		return !predicateFunc(t)
+	}
+}
+
+// And returns a new predicate function that would return true if all of the
+// given predicate functions return true for the given value; false otherwise
+func And[T any](predicateFuncs ...func(T) bool) func(T) bool {
+	return func(t T) bool {
+		for _, prepredicateFunc := range predicateFuncs {
+			if !prepredicateFunc(t) {
+				return false
+			}
+		}
+
+		return true
+	}
+}
+
+// Or returns a new predicate function that would return true if any of the
+// given predicate functions returns true for the given value; false otherwise
+func Or[T any](predicateFuncs ...func(T) bool) func(T) bool {
+	return func(t T) bool {
+		for _, prepredicateFunc := range predicateFuncs {
+			if prepredicateFunc(t) {
+				return true
+			}
+		}
+
+		return false
+	}
+}
