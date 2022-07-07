@@ -33,3 +33,49 @@ func TestMustNoErr(t *testing.T) {
 	})
 	assert.Panics(t, func() { MustNoErr(errors.New("some error")) })
 }
+
+func TestNot(t *testing.T) {
+	isLessThanOrEqualToZero := Not(func(i int64) bool { return i > 0 })
+	isPositive := Not(isLessThanOrEqualToZero)
+
+	assert.False(t, isLessThanOrEqualToZero(1))
+	assert.True(t, isLessThanOrEqualToZero(0))
+	assert.True(t, isLessThanOrEqualToZero(-1))
+
+	assert.True(t, isPositive(1))
+	assert.False(t, isPositive(0))
+	assert.False(t, isPositive(-1))
+}
+
+func TestAnd(t *testing.T) {
+	isPositive := func(i int64) bool { return i > 0 }
+	isEven := func(i int64) bool { return i%2 == 0 }
+	isLessThanFive := func(i int64) bool { return i < 5 }
+
+	and := And(isPositive, isEven, isLessThanFive)
+
+	assert.False(t, and(0))
+	assert.False(t, and(1))
+	assert.True(t, and(2))
+	assert.False(t, and(3))
+	assert.True(t, and(4))
+	assert.False(t, and(5))
+}
+
+func TestOr(t *testing.T) {
+	isNegative := func(i int64) bool { return i < 0 }
+	isEven := func(i int64) bool { return i%2 == 0 }
+	isLessThanFive := func(i int64) bool { return i < 5 }
+
+	or := Or(isNegative, isEven, isLessThanFive)
+
+	assert.True(t, or(0))
+	assert.True(t, or(1))
+	assert.True(t, or(2))
+	assert.True(t, or(3))
+	assert.True(t, or(4))
+	assert.False(t, or(5))
+	assert.True(t, or(6))
+	assert.True(t, or(-1))
+	assert.True(t, or(-2))
+}
