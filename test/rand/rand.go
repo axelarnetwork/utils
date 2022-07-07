@@ -86,9 +86,9 @@ func Bytes[T constraints.Integer](len T) []byte {
 	return bz
 }
 
-// BytesBetween returns a random byte slice of random length in the given limits (inclusive)
-func BytesBetween[T constraints.Integer](minLength T, maxLength T) []byte {
-	length := int(I64Between(minLength, maxLength+1))
+// BytesBetween returns a random byte slice of random length in the given limits (upper exclusive)
+func BytesBetween[T constraints.Integer](lower T, upper T) []byte {
+	length := int(I64Between(lower, upper))
 	bz := make([]byte, length)
 	for i, b := range I64GenBetween(0, 256).Take(length) {
 		bz[i] = byte(b)
