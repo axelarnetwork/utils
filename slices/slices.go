@@ -14,8 +14,8 @@ func Map[T, S any](source []T, f func(T) S) []S {
 	return out
 }
 
-// FMap composes Map and Flatten
-func FMap[T, S any](source []T, f func(T) []S) []S {
+// FlatMap composes Map and Flatten
+func FlatMap[T, S any](source []T, f func(T) []S) []S {
 	return Flatten(Map(source, f))
 }
 
