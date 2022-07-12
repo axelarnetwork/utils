@@ -16,7 +16,7 @@ func (res Result[T]) Error() error {
 	return res.err
 }
 
-// NewResult wraps a (value, error) tuple ina Result struct
+// NewResult wraps a (value, error) tuple in a Result
 func NewResult[T any](ok T, err error) Result[T] {
 	res := Result[T]{
 		ok:  ok,
@@ -24,6 +24,24 @@ func NewResult[T any](ok T, err error) Result[T] {
 	}
 	if err != nil {
 		res.ok = *new(T)
+	}
+	return res
+}
+
+// ResultFromOk returns a Result without error
+func ResultFromOk[T any](ok T) Result[T] {
+	res := Result[T]{
+		ok:  ok,
+		err: nil,
+	}
+	return res
+}
+
+// ResultFromErr returns a result with error
+func ResultFromErr[T any](err error) Result[T] {
+	res := Result[T]{
+		ok:  *new(T),
+		err: err,
 	}
 	return res
 }

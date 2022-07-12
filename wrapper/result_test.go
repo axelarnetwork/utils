@@ -26,6 +26,9 @@ func TestResult(t *testing.T) {
 
 	assert.NoError(t, wrapper.ContinueWithResult(successfulFunc(7), successfulFunc2).Error())
 	assert.Equal(t, '7', wrapper.ContinueWithResult(successfulFunc(7), successfulFunc2).Ok())
+
+	assert.Equal(t, wrapper.NewResult(6, nil), wrapper.ResultFromOk(6))
+	assert.Equal(t, wrapper.NewResult(0, errors.New("some error")), wrapper.ResultFromErr[int](errors.New("some error")))
 }
 
 func successfulFunc(i int) wrapper.Result[string] {
