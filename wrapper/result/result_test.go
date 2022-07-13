@@ -27,17 +27,17 @@ func TestResult(t *testing.T) {
 		assert.Equal(t, result.New(0, errors.New("some error")), result.FromErr[int](errors.New("some error")))
 	})
 
-	t.Run("Continue", func(t *testing.T) {
-		assert.Error(t, result.Continue(successfulFunc(3), unsuccessfulFunc).Error())
-		assert.Error(t, result.Continue(unsuccessfulFunc("fail"), successfulFunc).Error())
+	t.Run("Pipe", func(t *testing.T) {
+		assert.Error(t, result.Pipe(successfulFunc(3), unsuccessfulFunc).Error())
+		assert.Error(t, result.Pipe(unsuccessfulFunc("fail"), successfulFunc).Error())
 
-		assert.NoError(t, result.Continue(successfulFunc(7), successfulFunc2).Error())
-		assert.Equal(t, '7', result.Continue(successfulFunc(7), successfulFunc2).Ok())
+		assert.NoError(t, result.Pipe(successfulFunc(7), successfulFunc2).Error())
+		assert.Equal(t, '7', result.Pipe(successfulFunc(7), successfulFunc2).Ok())
 	})
 
-	t.Run("Map", func(t *testing.T) {
-		assert.Error(t, result.Map(unsuccessfulFunc("fail"), strconv.Itoa).Error())
-		assert.NoError(t, result.Map(successfulFunc(20), strings.IsASCIIText).Error())
+	t.Run("Try", func(t *testing.T) {
+		assert.Error(t, result.Try(unsuccessfulFunc("fail"), strconv.Itoa).Error())
+		assert.NoError(t, result.Try(successfulFunc(20), strings.IsASCIIText).Error())
 	})
 }
 

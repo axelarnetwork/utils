@@ -42,16 +42,16 @@ func FromErr[T any](err error) Result[T] {
 	return res
 }
 
-// Continue only executes f if res.Error() is nil, returns the original error otherwise
-func Continue[T1, T2 any](res Result[T1], f func(T1) Result[T2]) Result[T2] {
+// Pipe only executes f if res.Error() is nil, returns the original error otherwise
+func Pipe[T1, T2 any](res Result[T1], f func(T1) Result[T2]) Result[T2] {
 	if res.Error() != nil {
 		return FromErr[T2](res.Error())
 	}
 	return f(res.Ok())
 }
 
-// Map transforms the value of Result to the new type if OK, returns the original error otherwise
-func Map[T1, T2 any](res Result[T1], f func(T1) T2) Result[T2] {
+// Try transforms the value of Result to the new type if OK, returns the original error otherwise
+func Try[T1, T2 any](res Result[T1], f func(T1) T2) Result[T2] {
 	if res.Error() != nil {
 		return FromErr[T2](res.Error())
 	}
