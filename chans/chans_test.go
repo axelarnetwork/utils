@@ -108,7 +108,10 @@ func TestPushPop(t *testing.T) {
 		defer cancel()
 
 		assert.False(t, chans.Push(cancelledCtx, c, 7))
-		_, ok := chans.Pop(cancelledCtx, c)
+
+		cancelledCtx2, cancel2 := context.WithTimeout(context.Background(), 50*time.Millisecond)
+		defer cancel2()
+		_, ok := chans.Pop(cancelledCtx2, c)
 		assert.False(t, ok)
 	})
 }
