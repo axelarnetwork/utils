@@ -41,7 +41,7 @@ func ForEach[T any](source <-chan T, f func(T)) {
 	}()
 }
 
-// Flatten flattens a chan of slices into a chan of elements
+// Flatten flattens a chan of chans into a chan of elements
 func Flatten[T any](source <-chan <-chan T) <-chan T {
 	out := make(chan T, cap(source))
 
