@@ -1,9 +1,12 @@
-package chans
+package chans_test
 
 import (
+	"context"
 	"sync"
 	"testing"
+	"time"
 
+	"github.com/axelarnetwork/utils/chans"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -11,7 +14,7 @@ func TestMap(t *testing.T) {
 	source := make(chan int, 1)
 	defer close(source)
 
-	even := Map(source, func(i int) bool { return i%2 == 0 })
+	even := chans.Map(source, func(i int) bool { return i%2 == 0 })
 
 	for i := 0; i < 100; i++ {
 		source <- i
@@ -27,7 +30,7 @@ func TestFilter(t *testing.T) {
 	}
 	close(source)
 
-	even := Filter(source, func(i int) bool { return i%2 == 0 })
+	even := chans.Filter(source, func(i int) bool { return i%2 == 0 })
 
 	for x := range even {
 		assert.Equal(t, 0, x%2)
@@ -40,7 +43,7 @@ func TestForEach(t *testing.T) {
 
 	wg := &sync.WaitGroup{}
 	wg.Add(100)
-	ForEach(source, func(n int) {
+	chans.ForEach(source, func(n int) {
 		total += n
 		wg.Done()
 	})
@@ -55,9 +58,9 @@ func TestForEach(t *testing.T) {
 }
 
 func TestFlatten(t *testing.T) {
-	source := make(chan []int, 1)
+	source := make(chan (<-chan int), 1)
 
-	out := Flatten(source)
+	out := chans.Flatten(source)
 
 	total := 0
 	wg := &sync.WaitGroup{}
@@ -70,9 +73,42 @@ func TestFlatten(t *testing.T) {
 	}()
 
 	for i := 0; i < 99; i += 3 {
-		source <- []int{i, i + 1, i + 2}
+		c := make(chan int, 3)
+		source <- c
+		c <- i
+		c <- i + 1
+		c <- i + 2
 	}
 	close(source)
 	wg.Wait()
 	assert.Equal(t, 4851, total)
+}
+
+func TestPushPop(t *testing.T) {
+	t.Run("valid ctx", func(t *testing.T) {
+		c := make(chan int, 1)
+		assert.True(t, chans.Push(context.Background(), c, 7))
+		i, ok := chans.Pop(context.Background(), c)
+		assert.True(t, ok)
+		assert.Equal(t, 7, i)
+	})
+
+	t.Run("cancelled ctx", func(t *testing.T) {
+		c := make(chan int, 1)
+		cancelledCtx, cancel := context.WithCancel(context.Background())
+		cancel()
+		assert.False(t, chans.Push(cancelledCtx, c, 7))
+		_, ok := chans.Pop(cancelledCtx, c)
+		assert.False(t, ok)
+	})
+
+	t.Run("cancel ctx while blocked", func(t *testing.T) {
+		c := make(chan int)
+		cancelledCtx, cancel := context.WithTimeout(context.Background(), 50*time.Millisecond)
+		defer cancel()
+
+		assert.False(t, chans.Push(cancelledCtx, c, 7))
+		_, ok := chans.Pop(cancelledCtx, c)
+		assert.False(t, ok)
+	})
 }
