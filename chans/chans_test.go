@@ -78,6 +78,7 @@ func TestFlatten(t *testing.T) {
 		c <- i
 		c <- i + 1
 		c <- i + 2
+		close(c)
 	}
 	close(source)
 	wg.Wait()
