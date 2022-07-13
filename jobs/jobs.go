@@ -2,6 +2,7 @@ package jobs
 
 import (
 	"context"
+	"fmt"
 	"sync"
 
 	"golang.org/x/sync/semaphore"
@@ -94,11 +95,18 @@ func (mgr *JobManager) AddJob(j Job) {
 		go func() {
 			defer mgr.wgJobs.Done()
 			defer mgr.jobCapacity.Release(1)
+			defer mgr.recovery()
 			if err := j(mgr.ctx); err != nil {
 				mgr.tryCacheError(err)
 			}
 		}()
 	}()
+}
+
+func (mgr *JobManager) recovery() {
+	if r := recover(); r != nil {
+		mgr.tryCacheError(fmt.Errorf("job panicked: %s", r))
+	}
 }
 
 func (mgr *JobManager) tryCacheError(err error) {
