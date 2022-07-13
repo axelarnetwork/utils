@@ -1,4 +1,4 @@
-package result
+package results
 
 // Result wraps the idiomatic tuple of (value, error)
 type Result[T any] struct {
