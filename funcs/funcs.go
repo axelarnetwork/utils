@@ -1,6 +1,10 @@
 package funcs
 
-import "github.com/pkg/errors"
+import (
+	"fmt"
+
+	"github.com/pkg/errors"
+)
 
 // Compose composes two compatible functions
 func Compose[T1, T2, T3 any](f func(T1) T2, g func(T2) T3) func(T1) T3 {
@@ -26,6 +30,15 @@ func MustNoErr(err error) {
 	if err != nil {
 		panic(errors.Wrap(err, "call should not have failed"))
 	}
+}
+
+// MustOk returns the result if ok, panics otherwise
+func MustOk[T any](result T, ok bool) T {
+	if !ok {
+		panic(fmt.Errorf("result is not found"))
+	}
+
+	return result
 }
 
 // Not returns a new predicate function that would return true if the given
