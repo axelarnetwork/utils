@@ -79,3 +79,13 @@ func TestOr(t *testing.T) {
 	assert.True(t, or(-1))
 	assert.True(t, or(-2))
 }
+
+func TestMustOk(t *testing.T) {
+	notOkFunc := func() (uint64, bool) { return 1, false }
+	okFunc := func() (uint64, bool) { return 1, true }
+
+	assert.Panics(t, func() {
+		MustOk(notOkFunc())
+	})
+	assert.EqualValues(t, 1, MustOk(okFunc()))
+}
