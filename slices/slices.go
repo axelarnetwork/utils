@@ -144,13 +144,22 @@ func ToMap[T1 any, T2 comparable](source []T1, lookup func(T1) T2, strictUniquen
 }
 
 // TryCast tries to cast each element of the slice from type T1 to type T2. Elements get filtered out of the cast is unsuccessful.
-func TryCast[T1 interface{}, T2 any](source []T1) []T2 {
+func TryCast[T1 any, T2 any](source []T1) []T2 {
 	out := make([]T2, 0, cap(source))
 	for i := range source {
 		// T1 could be a concrete type, so the compiler does not allow a type assertion without boxing T1 first
 		if x, ok := (interface{}(source[i])).(T2); ok {
 			out = append(out, x)
 		}
+	}
+	return out
+}
+
+// Reverse returns a new slice in which the elements aree listed in reverse order
+func Reverse[T1 any](source []T1) []T1 {
+	out := make([]T1, 0, cap(source))
+	for i := len(source) - 1; i >= 0; i-- {
+		out = append(out, source[i])
 	}
 	return out
 }

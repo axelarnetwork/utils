@@ -4,9 +4,10 @@ import (
 	"strconv"
 	"testing"
 
+	"github.com/stretchr/testify/assert"
+
 	"github.com/axelarnetwork/utils/funcs"
 	"github.com/axelarnetwork/utils/slices"
-	"github.com/stretchr/testify/assert"
 
 	"github.com/axelarnetwork/utils/test/rand"
 )
@@ -145,4 +146,9 @@ func TestCast(t *testing.T) {
 	assert.Empty(t, slices.TryCast[int, string](source))
 
 	assert.Len(t, slices.TryCast[int, interface{}](source), 10)
+}
+
+func TestReverse(t *testing.T) {
+	source := []int{1, 2, 3, 4, 5}
+	assert.Equal(t, []int{5, 4, 3, 2, 1}, slices.Reverse(source))
 }
