@@ -89,3 +89,14 @@ func TestMustOk(t *testing.T) {
 	})
 	assert.EqualValues(t, 1, MustOk(okFunc()))
 }
+
+func TestZero(t *testing.T) {
+	input := "test"
+
+	zero(&input) // make sure it even works when calling a separate function
+	assert.IsType(t, new(string), &input)
+}
+
+func zero(input any) {
+	ZeroPtr(input)
+}

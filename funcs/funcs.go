@@ -2,6 +2,7 @@ package funcs
 
 import (
 	"fmt"
+	"reflect"
 
 	"github.com/pkg/errors"
 )
@@ -75,4 +76,8 @@ func Or[T any](predicateFuncs ...func(T) bool) func(T) bool {
 
 		return false
 	}
+}
+
+func ZeroPtr[T any](ptr T) T {
+	return reflect.New(reflect.TypeOf(ptr)).Elem().Interface().(T)
 }
