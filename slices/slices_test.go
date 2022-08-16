@@ -152,3 +152,8 @@ func TestReverse(t *testing.T) {
 	source := []int{1, 2, 3, 4, 5}
 	assert.Equal(t, []int{5, 4, 3, 2, 1}, slices.Reverse(source))
 }
+
+func TestGroupBy(t *testing.T) {
+	source := []int{1, 2, 3, 4, 5}
+	assert.Equal(t, map[bool][]int{true: {2, 4}, false: {1, 3, 5}}, slices.GroupBy(source, func(i int) bool { return i%2 == 0 }))
+}
