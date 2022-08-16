@@ -163,3 +163,15 @@ func Reverse[T1 any](source []T1) []T1 {
 	}
 	return out
 }
+
+// GroupBy returns a map with given items each group into a slice
+func GroupBy[T any, K comparable](source []T, fn func(T) K) map[K][]T {
+	results := make(map[K][]T)
+
+	for _, s := range source {
+		k := fn(s)
+		results[k] = append(results[k], s)
+	}
+
+	return results
+}
