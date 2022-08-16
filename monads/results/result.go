@@ -6,13 +6,13 @@ type Result[T any] struct {
 	err error
 }
 
-// Ok returns a value of Error is nil
+// Ok returns a value if Err is nil
 func (res Result[T]) Ok() T {
 	return res.ok
 }
 
-// Error returns an error, Ok is invalid in that case
-func (res Result[T]) Error() error {
+// Err returns an error, Ok is invalid in that case
+func (res Result[T]) Err() error {
 	return res.err
 }
 
@@ -42,18 +42,18 @@ func FromErr[T any](err error) Result[T] {
 	return res
 }
 
-// Pipe only executes f if res.Error() is nil, returns the original error otherwise
+// Pipe only executes f if res.Err() is nil, returns the original error otherwise
 func Pipe[T1, T2 any](res Result[T1], f func(T1) Result[T2]) Result[T2] {
-	if res.Error() != nil {
-		return FromErr[T2](res.Error())
+	if res.Err() != nil {
+		return FromErr[T2](res.Err())
 	}
 	return f(res.Ok())
 }
 
 // Try transforms the value of Result to the new type if OK, returns the original error otherwise
 func Try[T1, T2 any](res Result[T1], f func(T1) T2) Result[T2] {
-	if res.Error() != nil {
-		return FromErr[T2](res.Error())
+	if res.Err() != nil {
+		return FromErr[T2](res.Err())
 	}
 	return FromOk(f(res.Ok()))
 }

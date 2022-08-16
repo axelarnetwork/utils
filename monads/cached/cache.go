@@ -1,4 +1,4 @@
-package wrapper
+package cached
 
 // Cached wraps a lazy value getter and stores the result for quick access
 type Cached[T any] struct {
@@ -7,8 +7,8 @@ type Cached[T any] struct {
 	get   func() T
 }
 
-// NewCached returns a new cached value
-func NewCached[T any](getValue func() T) Cached[T] {
+// New returns a new cached value
+func New[T any](getValue func() T) Cached[T] {
 	return Cached[T]{
 		get: getValue,
 	}

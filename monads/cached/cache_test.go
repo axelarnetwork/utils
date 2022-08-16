@@ -1,19 +1,20 @@
-package wrapper_test
+package cached_test
 
 import (
 	"testing"
 
-	"github.com/axelarnetwork/utils/test/rand"
-	"github.com/axelarnetwork/utils/wrapper"
 	"github.com/stretchr/testify/assert"
+
+	"github.com/axelarnetwork/utils/monads/cached"
+	"github.com/axelarnetwork/utils/test/rand"
 )
 
 func TestCached(t *testing.T) {
-	val := wrapper.NewCached(func() int { return 5 })
+	val := cached.New(func() int { return 5 })
 
 	assert.Equal(t, 5, val.Value())
 
-	valFromRand := wrapper.NewCached(func() string { return rand.Str(10) })
+	valFromRand := cached.New(func() string { return rand.Str(10) })
 
 	cachedValue := valFromRand.Value()
 	assert.Equal(t, cachedValue, valFromRand.Value())
