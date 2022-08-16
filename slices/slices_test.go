@@ -157,3 +157,8 @@ func TestGroupBy(t *testing.T) {
 	source := []int{1, 2, 3, 4, 5}
 	assert.Equal(t, map[bool][]int{true: {2, 4}, false: {1, 3, 5}}, slices.GroupBy(source, func(i int) bool { return i%2 == 0 }))
 }
+
+func TestLast(t *testing.T) {
+	source := []int{1, 2, 3, 4, 5, 6}
+	assert.Equal(t, 6, slices.Last(source))
+}
