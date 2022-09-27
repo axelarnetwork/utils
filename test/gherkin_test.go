@@ -79,15 +79,20 @@ func TestGherkinSeparateStatements(t *testing.T) {
 		testLabel += " THEN assert something"
 		assertNameEquals(t, testLabel)
 	})
+
+	assertOneThing := Then("assert something", func(t *testing.T) {
+		testLabel += " THEN assert something"
+	})
+
 	assertSomethingElse := Then("assert something else", func(t *testing.T) {
-		testLabel += " THEN assert something else"
+		testLabel += " AND THEN assert something else"
 		assertNameEquals(t, testLabel)
 	})
 
 	givenSetup.Given2(moreSetup).When2(somethingHappens).Then2(assertSomething).Run(t)
 	givenSetup.Branch(
 		somethingHappens.Then2(assertSomething),
-		moreSetup.When2(somethingHappens).When2(somethingElseHappens).Then2(assertSomethingElse),
+		moreSetup.When2(somethingHappens).When2(somethingElseHappens).Then2(assertOneThing).Then2(assertSomethingElse),
 	).Run(t)
 }
 

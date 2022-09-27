@@ -186,6 +186,14 @@ func (then ThenStatement) Then(description string, execution func(t *testing.T))
 	}
 }
 
+// Then2 allows the use of a previously defined Then statement
+func (then ThenStatement) Then2(then2 ThenStatement) ThenStatement {
+	return ThenStatement{
+		label: mergeLabels(then.label, then2.label),
+		test:  func(t *testing.T) { then.test(t); then2.test(t) },
+	}
+}
+
 // Run executes all defined test paths. Optionally, each path is repeated a given number of times
 func (then ThenStatement) Run(t *testing.T, repeats ...int) bool {
 	repeat := 1
