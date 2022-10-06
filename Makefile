@@ -6,3 +6,8 @@ go.sum: go.mod
 .PHONY: generate
 generate: go.sum
 	go generate ./...
+
+
+.PHONY: build-check
+build-check: go.sum
+		go build -o ./bin/check -mod=readonly $(BUILD_FLAGS) ./checks/main
