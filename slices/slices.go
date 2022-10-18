@@ -155,8 +155,8 @@ func TryCast[T1 any, T2 any](source []T1) []T2 {
 	}
 
 	t2 := reflect.TypeOf(out).Elem()
-	if reflect.TypeOf(source[0]).ConvertibleTo(t2) {
-		for i := range source {
+	for i := range source {
+		if reflect.TypeOf(source[i]).ConvertibleTo(t2) {
 			out = append(out, reflect.ValueOf(source[i]).Convert(t2).Interface().(T2))
 
 		}
