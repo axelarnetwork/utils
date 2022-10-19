@@ -106,7 +106,7 @@ func (mgr *JobManager) AddJob(j Job) {
 
 func (mgr *JobManager) recovery() {
 	if r := recover(); r != nil {
-		err := fmt.Errorf("job panicked: %s", errors.Wrap(r, 1).ErrorStack())
+		err := fmt.Errorf("job panicked: %s\n%s", r, errors.Wrap(r, 1).Stack())
 		mgr.tryCacheError(err)
 	}
 }
