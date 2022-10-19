@@ -6,7 +6,6 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/tendermint/tendermint/libs/strings"
 
 	"github.com/axelarnetwork/utils/monads/results"
 )
@@ -38,7 +37,7 @@ func TestResult(t *testing.T) {
 
 	t.Run("Try", func(t *testing.T) {
 		assert.Error(t, results.Try(unsuccessfulFunc("fail"), strconv.Itoa).Err())
-		assert.NoError(t, results.Try(successfulFunc(20), strings.IsASCIIText).Err())
+		assert.NoError(t, results.Try(successfulFunc(20), func(s string) bool { return s == "20" }).Err())
 	})
 }
 

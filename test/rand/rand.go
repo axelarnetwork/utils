@@ -5,9 +5,6 @@ import (
 	"time"
 
 	"golang.org/x/exp/constraints"
-
-	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/cosmos/cosmos-sdk/types/address"
 )
 
 const (
@@ -311,16 +308,6 @@ func (g DistinctStrGen) Next() string {
 		g.previous[s] = true
 		return s
 	}
-}
-
-// ValAddr generates a random validator address
-func ValAddr() sdk.ValAddress {
-	return Bytes(address.Len)
-}
-
-// AccAddr generates a random cosmos address
-func AccAddr() sdk.AccAddress {
-	return Bytes(address.Len)
 }
 
 // Time generates a random time
