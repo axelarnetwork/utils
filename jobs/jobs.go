@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"sync"
 
+	"github.com/go-errors/errors"
 	"golang.org/x/sync/semaphore"
 )
 
@@ -105,7 +106,8 @@ func (mgr *JobManager) AddJob(j Job) {
 
 func (mgr *JobManager) recovery() {
 	if r := recover(); r != nil {
-		mgr.tryCacheError(fmt.Errorf("job panicked: %s", r))
+		err := fmt.Errorf("job panicked: %s", errors.Wrap(r, 0).ErrorStack())
+		mgr.tryCacheError(err)
 	}
 }
 
