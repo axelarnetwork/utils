@@ -141,11 +141,16 @@ func TestToMap(t *testing.T) {
 	assert.Panics(t, func() { slices.ToMap(source, strconv.Itoa, true) })
 }
 
+type derived string
+
 func TestCast(t *testing.T) {
 	source := slices.Expand(funcs.Identity[int], 10)
-	assert.Empty(t, slices.TryCast[int, string](source))
+	assert.Empty(t, slices.TryCast[int, []string](source))
 
 	assert.Len(t, slices.TryCast[int, interface{}](source), 10)
+
+	source2 := slices.Expand(func(idx int) derived { return derived(strconv.Itoa(idx)) }, 10)
+	assert.Len(t, slices.TryCast[derived, string](source2), 10)
 }
 
 func TestReverse(t *testing.T) {
