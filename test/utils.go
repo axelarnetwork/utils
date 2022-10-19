@@ -9,8 +9,6 @@ import (
 	"path/filepath"
 	"testing"
 
-	abci "github.com/tendermint/tendermint/abci/types"
-
 	"github.com/axelarnetwork/utils/slices"
 )
 
@@ -63,20 +61,6 @@ func (tc TestCases[T]) Map(f func(testCase T) Runner) Runner {
 		}
 	}
 	return out
-}
-
-// Events wraps sdk.Events
-type Events []abci.Event
-
-// Filter returns a collection of events filtered by the predicate
-func (fe Events) Filter(predicate func(events abci.Event) bool) Events {
-	var filtered Events
-	for _, event := range fe {
-		if predicate(event) {
-			filtered = append(filtered, event)
-		}
-	}
-	return filtered
 }
 
 // ErrorCache is a struct that can be used to get at the error that is emitted by test assertions when passing it instead ot *testing.T
