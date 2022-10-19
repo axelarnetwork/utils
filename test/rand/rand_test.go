@@ -3,7 +3,6 @@ package rand
 import (
 	"testing"
 
-	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -109,20 +108,6 @@ func TestRandDistinctStringGen_Take_SameLength(t *testing.T) {
 		previous[s] = struct{}{}
 	}
 	assert.Len(t, previous, 1000)
-}
-
-func TestRandomValidator(t *testing.T) {
-	address1 := ValAddr()
-	address2, err := sdk.ValAddressFromBech32(address1.String())
-	assert.NoError(t, err)
-	assert.Equal(t, address1, address2)
-}
-
-func TestRandomAddress(t *testing.T) {
-	address1 := AccAddr()
-	address2, err := sdk.AccAddressFromBech32(address1.String())
-	assert.NoError(t, err)
-	assert.Equal(t, address1, address2)
 }
 
 func TestRandomTime(t *testing.T) {
