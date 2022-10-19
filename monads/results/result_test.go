@@ -37,7 +37,7 @@ func TestResult(t *testing.T) {
 
 	t.Run("Try", func(t *testing.T) {
 		assert.Error(t, results.Try(unsuccessfulFunc("fail"), strconv.Itoa).Err())
-		assert.NoError(t, results.Try(successfulFunc(20), func(s string) bool { return len(s) == 2 }).Err())
+		assert.NoError(t, results.Try(successfulFunc(20), func(s string) bool { return s == "20" }).Err())
 	})
 }
 
