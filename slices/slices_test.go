@@ -26,6 +26,14 @@ func TestMap(t *testing.T) {
 	}
 }
 
+func TestFlatMap(t *testing.T) {
+	source := []int{1, 2, 3}
+
+	out := slices.FlatMap(source, func(i int) []int { return []int{i, i, i} })
+
+	assert.Equal(t, []int{1, 1, 1, 2, 2, 2, 3, 3, 3}, out)
+}
+
 func TestAll(t *testing.T) {
 	even := make([]int, 0, 20)
 
@@ -111,6 +119,13 @@ func TestExpand(t *testing.T) {
 	out := slices.Expand(strconv.Itoa, 5)
 
 	assert.Equal(t, []string{"0", "1", "2", "3", "4"}, out)
+}
+
+func TestExpand2(t *testing.T) {
+	gen := func() uint64 { return 3 }
+	out := slices.Expand2(gen, 5)
+
+	assert.Equal(t, []uint64{3, 3, 3, 3, 3}, out)
 }
 
 func TestWhile(t *testing.T) {
