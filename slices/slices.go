@@ -105,6 +105,16 @@ func Expand[T any](generator func(idx int) T, count int) []T {
 	return out
 }
 
+// Expand2 creates a slice by executing the generator function count times
+func Expand2[T any](generator func() T, count int) []T {
+	out := make([]T, count)
+
+	for i := 0; i < count; i++ {
+		out[i] = generator()
+	}
+	return out
+}
+
 // Distinct returns a new slice where duplicate entries are removed
 func Distinct[T comparable](source []T) []T {
 	seen := make(map[T]struct{})
