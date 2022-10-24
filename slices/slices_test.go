@@ -115,6 +115,12 @@ func TestFlatten(t *testing.T) {
 	}
 }
 
+func TestConcat(t *testing.T) {
+	expected := []int{1, 2, 3, 4, 5, 6}
+
+	assert.Equal(t, expected, slices.Concat([]int{1, 2}, []int{3}, []int{4, 5, 6}))
+}
+
 func TestExpand(t *testing.T) {
 	out := slices.Expand(strconv.Itoa, 5)
 
