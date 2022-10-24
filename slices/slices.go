@@ -84,7 +84,11 @@ func All[T any](source []T, predicate func(T) bool) bool {
 
 // Flatten flattens a slice of slices into a single slice
 func Flatten[T any](source [][]T) []T {
-	out := make([]T, 0)
+	var l int
+	for i := range source {
+		l += len(source[i])
+	}
+	out := make([]T, 0, l)
 
 	for i := range source {
 		for j := range source[i] {
@@ -93,6 +97,16 @@ func Flatten[T any](source [][]T) []T {
 	}
 
 	return out
+}
+
+// Concat concatenates all given slices
+func Concat[T any](first []T, other ...[]T) []T {
+	l := 1 + len(other)
+	sources := make([][]T, 0, l)
+	sources = append(sources, first)
+	sources = append(sources, other...)
+
+	return Flatten(sources)
 }
 
 // Expand creates a slice by executing the generator function count times
