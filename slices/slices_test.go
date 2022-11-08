@@ -152,7 +152,7 @@ func TestDistinct(t *testing.T) {
 
 func TestHasDuplicates(t *testing.T) {
 	assert.True(t, slices.HasDuplicates([]int{0, 3, 2, 7, 2, 1, 3, 0}))
-	assert.True(t, slices.HasDuplicates([]int{0, 3, 2, 7, 2, 1}))
+	assert.False(t, slices.HasDuplicates([]int{0, 3, 2, 7, 1}))
 }
 
 func TestToMap(t *testing.T) {
