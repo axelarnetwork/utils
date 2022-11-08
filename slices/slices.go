@@ -146,6 +146,11 @@ func Distinct[T comparable](source []T) []T {
 	return out
 }
 
+// HasDuplicates returns true if a slice has duplicate entries, false otherwise.
+func HasDuplicates[T comparable](source []T) bool {
+	return len(Distinct(source)) != len(source)
+}
+
 // ToMap returns a map from the given slice with keys associated by the lookup function. Panics if strictUniqueness is set, otherwise overrides values for colliding keys.
 func ToMap[T1 any, T2 comparable](source []T1, lookup func(T1) T2, strictUniqueness ...bool) map[T2]T1 {
 	m := make(map[T2]T1, len(source))
