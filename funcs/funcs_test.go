@@ -89,3 +89,10 @@ func TestMustOk(t *testing.T) {
 	})
 	assert.EqualValues(t, 1, MustOk(okFunc()))
 }
+
+func TestMustTrue(t *testing.T) {
+	assert.NotPanics(t, func() {
+		MustTrue(true)
+	})
+	assert.Panics(t, func() { MustTrue(false) })
+}

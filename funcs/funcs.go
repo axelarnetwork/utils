@@ -41,6 +41,13 @@ func MustOk[T any](result T, ok bool) T {
 	return result
 }
 
+// MustTrue panics if not true, noop otherwise
+func MustTrue(ok bool) {
+	if !ok {
+		panic(fmt.Errorf("must be true"))
+	}
+}
+
 // Not returns a new predicate function that would return true if the given
 // predicate function returns false; false otherwise
 func Not[T any](predicateFunc func(T) bool) func(T) bool {
