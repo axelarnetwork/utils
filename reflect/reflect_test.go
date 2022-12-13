@@ -28,8 +28,31 @@ func TestCreate(t *testing.T) {
 	})
 
 	assert.Panics(t, func() {
-		val := reflect.Create[**struct{}]()
-		assert.NotNil(t, val)
+		_ = reflect.Create[**struct{}]()
 	})
 
+	assert.Panics(t, func() {
+		_ = reflect.Create[any]()
+	})
+
+	assert.Panics(t, func() {
+		_ = reflect.Create[*any]()
+	})
+
+	assert.Panics(t, func() {
+		_ = reflect.Create[testInterface]()
+	})
+}
+
+func TestIsInterface(t *testing.T) {
+	assert.False(t, reflect.IsInterface[int]())
+	assert.False(t, reflect.IsInterface[**struct{}]())
+
+	assert.True(t, reflect.IsInterface[any]())
+	assert.True(t, reflect.IsInterface[*any]())
+	assert.True(t, reflect.IsInterface[testInterface]())
+}
+
+type testInterface interface {
+	doWork()
 }
