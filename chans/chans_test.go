@@ -14,17 +14,15 @@ import (
 )
 
 func TestConcat(t *testing.T) {
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
-
 	var (
+		done = make(chan struct{})
 		cch1 = chans.FromValues(1, 2, 3)
 		cch2 = chans.FromValues(4, 5, 6)
 		cch3 = chans.FromValues(7, 8, 9)
 	)
 
 	go func() {
-		defer cancel()
+		defer close(done)
 
 		concatenated := chans.Concat(cch1, cch2, cch3)
 
@@ -35,7 +33,7 @@ func TestConcat(t *testing.T) {
 		assert.Empty(t, concatenated)
 	}()
 
-	testutils.FailOnTimeout(ctx, t, 1*time.Second)
+	testutils.FailOnTimeout(t, done, 1*time.Second)
 }
 
 func TestEmpty(t *testing.T) {
@@ -106,11 +104,10 @@ func TestForEach(t *testing.T) {
 }
 
 func TestFromValues(t *testing.T) {
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
+	done := make(chan struct{})
 
 	go func() {
-		defer cancel()
+		defer close(done)
 
 		values := chans.FromValues(1, 2, 3)
 
@@ -121,7 +118,7 @@ func TestFromValues(t *testing.T) {
 		assert.Empty(t, values)
 	}()
 
-	testutils.FailOnTimeout(ctx, t, 1*time.Second)
+	testutils.FailOnTimeout(t, done, 1*time.Second)
 }
 
 func TestMap(t *testing.T) {
@@ -137,11 +134,10 @@ func TestMap(t *testing.T) {
 }
 
 func TestRange(t *testing.T) {
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
+	done := make(chan struct{})
 
 	go func() {
-		defer cancel()
+		defer close(done)
 
 		values := chans.Range(-3, 2)
 
@@ -152,15 +148,14 @@ func TestRange(t *testing.T) {
 		assert.Empty(t, values)
 	}()
 
-	testutils.FailOnTimeout(ctx, t, 1*time.Second)
+	testutils.FailOnTimeout(t, done, 1*time.Second)
 }
 
 func TestRangeBig(t *testing.T) {
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
+	done := make(chan struct{})
 
 	go func() {
-		defer cancel()
+		defer close(done)
 
 		values := chans.RangeBig(big.NewInt(-3), big.NewInt(2))
 
@@ -171,7 +166,7 @@ func TestRangeBig(t *testing.T) {
 		assert.Empty(t, values)
 	}()
 
-	testutils.FailOnTimeout(ctx, t, 1*time.Second)
+	testutils.FailOnTimeout(t, done, 1*time.Second)
 }
 
 func TestPushPop(t *testing.T) {
