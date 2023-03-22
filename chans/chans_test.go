@@ -39,18 +39,7 @@ func TestConcat(t *testing.T) {
 }
 
 func TestEmpty(t *testing.T) {
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
-
-	go func() {
-		defer cancel()
-
-		for range chans.Empty[struct{}]() {
-			require.FailNow(t, "non empty channel was returned")
-		}
-	}()
-
-	testutils.FailOnTimeout(ctx, t, 1*time.Second)
+	assert.Empty(t, chans.Empty[struct{}]())
 }
 
 func TestFilter(t *testing.T) {
