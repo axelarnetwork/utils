@@ -32,13 +32,7 @@ func TestConcat(t *testing.T) {
 			require.EqualValues(t, i, <-concatenated)
 		}
 
-		select {
-		case _, ok := <-concatenated:
-			if ok {
-				assert.FailNow(t, "channel contains unexpected items")
-			}
-		default:
-		}
+		assert.Empty(t, concatenated)
 	}()
 
 	testutils.FailOnTimeout(ctx, t, 1*time.Second)
@@ -135,13 +129,7 @@ func TestFromValues(t *testing.T) {
 			require.EqualValues(t, i, <-values)
 		}
 
-		select {
-		case _, ok := <-values:
-			if ok {
-				assert.FailNow(t, "channel contains unexpected items")
-			}
-		default:
-		}
+		assert.Empty(t, values)
 	}()
 
 	testutils.FailOnTimeout(ctx, t, 1*time.Second)
@@ -172,13 +160,7 @@ func TestRange(t *testing.T) {
 			require.EqualValues(t, i, <-values)
 		}
 
-		select {
-		case _, ok := <-values:
-			if ok {
-				assert.FailNow(t, "channel contains unexpected items")
-			}
-		default:
-		}
+		assert.Empty(t, values)
 	}()
 
 	testutils.FailOnTimeout(ctx, t, 1*time.Second)
@@ -197,13 +179,7 @@ func TestRangeBig(t *testing.T) {
 			require.EqualValues(t, big.NewInt(int64(i)), <-values)
 		}
 
-		select {
-		case _, ok := <-values:
-			if ok {
-				assert.FailNow(t, "channel contains unexpected items")
-			}
-		default:
-		}
+		assert.Empty(t, values)
 	}()
 
 	testutils.FailOnTimeout(ctx, t, 1*time.Second)
@@ -222,13 +198,7 @@ func TestRangeBigExcl(t *testing.T) {
 			require.EqualValues(t, big.NewInt(int64(i)), <-values)
 		}
 
-		select {
-		case _, ok := <-values:
-			if ok {
-				assert.FailNow(t, "channel contains unexpected items")
-			}
-		default:
-		}
+		assert.Empty(t, values)
 	}()
 
 	testutils.FailOnTimeout(ctx, t, 1*time.Second)
