@@ -1,19 +1,36 @@
 package chans
 
-import "context"
+import (
+	"context"
+	"golang.org/x/exp/constraints"
+	"math/big"
+)
 
-// Map maps a channel of T to a channel of S. Runs until source channel is closed
-func Map[T, S any](source <-chan T, f func(T) S) <-chan S {
-	out := make(chan S, cap(source))
+var oneBig = big.NewInt(1)
+
+// Concat produces a channel containing all items from all channels concatenated in the order they are passed.
+func Concat[T any](channels ...<-chan T) <-chan T {
+	newCh := make(chan T)
 
 	go func() {
-		defer close(out)
-		for x := range source {
-			out <- f(x)
+		defer close(newCh)
+
+		for _, ch := range channels {
+			for v := range ch {
+				newCh <- v
+			}
 		}
 	}()
 
-	return out
+	return newCh
+}
+
+// Empty returns an empty chanel
+func Empty[T any]() <-chan T {
+	newCh := make(chan T)
+	close(newCh)
+
+	return newCh
 }
 
 // Filter returns a new channel that only contains elements that match the predicate. Runs until source channel is closed
@@ -32,15 +49,6 @@ func Filter[T any](source <-chan T, predicate func(T) bool) <-chan T {
 	return out
 }
 
-// ForEach performs the given function on every element in the channel.  Runs until source channel is closed
-func ForEach[T any](source <-chan T, f func(T)) {
-	go func() {
-		for x := range source {
-			f(x)
-		}
-	}()
-}
-
 // Flatten flattens a chan of chans into a chan of elements
 func Flatten[T any](source <-chan <-chan T) <-chan T {
 	out := make(chan T, cap(source))
@@ -51,6 +59,41 @@ func Flatten[T any](source <-chan <-chan T) <-chan T {
 			for element := range c {
 				out <- element
 			}
+		}
+	}()
+
+	return out
+}
+
+// ForEach performs the given function on every element in the channel.  Runs until source channel is closed
+func ForEach[T any](source <-chan T, f func(T)) {
+	go func() {
+		for x := range source {
+			f(x)
+		}
+	}()
+}
+
+// FromValues creates a ComposableChannel from a list of values
+func FromValues[T any](values ...T) <-chan T {
+	newCh := make(chan T, len(values))
+	defer close(newCh)
+
+	for _, v := range values {
+		newCh <- v
+	}
+
+	return newCh
+}
+
+// Map maps a channel of T to a channel of S. Runs until source channel is closed
+func Map[T, S any](source <-chan T, f func(T) S) <-chan S {
+	out := make(chan S, cap(source))
+
+	go func() {
+		defer close(out)
+		for x := range source {
+			out <- f(x)
 		}
 	}()
 
@@ -82,4 +125,51 @@ func Push[T any](ctx context.Context, c chan<- T, x T) bool {
 	case c <- x:
 		return true
 	}
+}
+
+// Range creates a channel that inclusively contains all values from `from` to `to`.
+func Range[T constraints.Integer](from, to T) <-chan T {
+	if from > to {
+		return Empty[T]()
+	}
+
+	newCh := make(chan T)
+
+	go func() {
+		defer close(newCh)
+
+		for i := from; i <= to; i++ {
+			newCh <- i
+		}
+	}()
+
+	return newCh
+}
+
+// RangeBig creates a channel that inclusively contains all values from `from` to `to`.
+func RangeBig(from, to *big.Int) <-chan *big.Int {
+	if from.Cmp(to) > 0 {
+		return Empty[*big.Int]()
+	}
+
+	newCh := make(chan *big.Int)
+
+	go func() {
+		defer close(newCh)
+
+		for i := (&big.Int{}).Set(from); i.Cmp(to) <= 0; i.Add(i, oneBig) {
+			newCh <- (&big.Int{}).Set(i)
+		}
+	}()
+
+	return newCh
+}
+
+// RangeBigExcl creates a channel that exclusively contains all values from `from` to `to`.
+// I.e. the first value will be `from+1` and the last value will be `to-1`.
+func RangeBigExcl(from, to *big.Int) <-chan *big.Int {
+	from = (&big.Int{}).Add(from, oneBig)
+	to = (&big.Int{}).Sub(to, oneBig)
+
+	return RangeBig(from, to)
 }
