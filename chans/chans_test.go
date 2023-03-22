@@ -174,25 +174,6 @@ func TestRangeBig(t *testing.T) {
 	testutils.FailOnTimeout(ctx, t, 1*time.Second)
 }
 
-func TestRangeBigExcl(t *testing.T) {
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
-
-	go func() {
-		defer cancel()
-
-		values := chans.RangeBigExcl(big.NewInt(-3), big.NewInt(2))
-
-		for i := -2; i <= 1; i++ {
-			require.EqualValues(t, big.NewInt(int64(i)), <-values)
-		}
-
-		assert.Empty(t, values)
-	}()
-
-	testutils.FailOnTimeout(ctx, t, 1*time.Second)
-}
-
 func TestPushPop(t *testing.T) {
 	t.Run("valid ctx", func(t *testing.T) {
 		c := make(chan int, 1)

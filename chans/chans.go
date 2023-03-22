@@ -171,12 +171,3 @@ func RangeBig(from, to *big.Int) <-chan *big.Int {
 
 	return newCh
 }
-
-// RangeBigExcl creates a channel that exclusively contains all values from `from` to `to`.
-// I.e. the first value will be `from+1` and the last value will be `to-1`.
-func RangeBigExcl(from, to *big.Int) <-chan *big.Int {
-	from = (&big.Int{}).Add(from, oneBig)
-	to = (&big.Int{}).Sub(to, oneBig)
-
-	return RangeBig(from, to)
-}
