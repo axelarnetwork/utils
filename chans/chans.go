@@ -86,9 +86,16 @@ func FromValues[T any](values ...T) <-chan T {
 	return newCh
 }
 
-// Map maps a channel of T to a channel of S. Runs until source channel is closed
-func Map[T, S any](source <-chan T, f func(T) S) <-chan S {
-	out := make(chan S, cap(source))
+// Map maps a channel of T to a channel of S. Runs until source channel is closed.
+// By default, output channel has the same capacity as the source channel.
+// Desired capacity of the output channel can be specified via an optional argument.
+func Map[T, S any](source <-chan T, f func(T) S, capacity ...int) <-chan S {
+	var out chan S
+	if len(capacity) > 0 {
+		out = make(chan S, capacity[0])
+	} else {
+		out = make(chan S, cap(source))
+	}
 
 	go func() {
 		defer close(out)
