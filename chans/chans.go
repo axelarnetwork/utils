@@ -51,7 +51,7 @@ func Filter[T any](source <-chan T, predicate func(T) bool) <-chan T {
 
 // Flatten flattens a chan of chans into a chan of elements
 func Flatten[T any](source <-chan <-chan T) <-chan T {
-	out := make(chan T, cap(source))
+	out := make(chan T)
 
 	go func() {
 		defer close(out)
