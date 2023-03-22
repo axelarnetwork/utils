@@ -94,7 +94,7 @@ func Map[T, S any](source <-chan T, f func(T) S, capacity ...int) <-chan S {
 	if len(capacity) > 0 {
 		out = make(chan S, capacity[0])
 	} else {
-		out = make(chan S, cap(source))
+		out = make(chan S)
 	}
 
 	go func() {
