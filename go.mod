@@ -4,7 +4,7 @@ go 1.18
 
 require (
 	github.com/go-errors/errors v1.4.2
-	github.com/matryer/moq v0.3.0
+	github.com/matryer/moq v0.3.1
 	github.com/pkg/errors v0.9.1
 	github.com/stretchr/testify v1.8.0
 	golang.org/x/exp v0.0.0-20221018221608-02f3b879a704
