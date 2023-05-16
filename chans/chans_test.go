@@ -200,3 +200,16 @@ func TestPushPop(t *testing.T) {
 		assert.False(t, ok)
 	})
 }
+
+func TestDrain(t *testing.T) {
+	c := make(chan string, 10)
+	c <- "a"
+	c <- "b"
+	c <- "c"
+	c <- "d"
+	close(c)
+
+	assert.Equal(t, 4, chans.Drain(c))
+	_, ok := <-c
+	assert.False(t, ok)
+}
