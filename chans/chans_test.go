@@ -203,6 +203,7 @@ func TestPushPop(t *testing.T) {
 
 func TestDrain(t *testing.T) {
 	c := make(chan string, 10)
+	
 	c <- "a"
 	c <- "b"
 	c <- "c"
