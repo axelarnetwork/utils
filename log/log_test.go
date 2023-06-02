@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/axelarnetwork/utils/log"
 	"github.com/stretchr/testify/assert"
+	tmlog "github.com/tendermint/tendermint/libs/log"
 	"testing"
 )
 
@@ -19,8 +20,8 @@ func TestMultipleSetups(t *testing.T) {
 	t.Cleanup(log.Reset)
 
 	assert.Panics(t, func() {
-		log.Setup(log.NewNOPLogger())
-		log.Setup(log.NewNOPLogger())
+		log.Setup(tmlog.NewNopLogger())
+		log.Setup(tmlog.NewNopLogger())
 	})
 }
 
@@ -237,7 +238,7 @@ func (t *testLogger) Error(msg string, keyvals ...interface{}) {
 	t.Keyvals <- append(t.keyvals, keyvals...)
 }
 
-func (t *testLogger) With(keyvals ...interface{}) log.BaseLogger {
+func (t *testLogger) With(keyvals ...interface{}) tmlog.Logger {
 	return &testLogger{
 		Output:  t.Output,
 		Keyvals: t.Keyvals,

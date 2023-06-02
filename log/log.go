@@ -3,15 +3,8 @@ package log
 import (
 	"context"
 	"fmt"
+	tmlog "github.com/tendermint/tendermint/libs/log"
 )
-
-type BaseLogger interface {
-	Debug(msg string, keyvals ...interface{})
-	Info(msg string, keyvals ...interface{})
-	Error(msg string, keyvals ...interface{})
-
-	With(keyvals ...interface{}) BaseLogger
-}
 
 // Logger is a simple interface to log at three log levels with additional formatting methods for convenience
 type Logger interface {
@@ -24,13 +17,13 @@ type Logger interface {
 }
 
 var (
-	defaultLogger = logWrapper{NewNOPLogger()}
+	defaultLogger = logWrapper{tmlog.NewNopLogger()}
 	frozen        bool
 )
 
 // Setup sets the logger that the application should use. The default is a nop logger, i.e. all logs are discarded.
 // Panics if called more than once without calling Reset first.
-func Setup(logger BaseLogger) {
+func Setup(logger tmlog.Logger) {
 	if frozen {
 		panic("logger was already set")
 	}
@@ -41,7 +34,7 @@ func Setup(logger BaseLogger) {
 
 // Reset returns the logger state to the default nop logger and enables Setup to be called again.
 func Reset() {
-	defaultLogger = logWrapper{NewNOPLogger()}
+	defaultLogger = logWrapper{tmlog.NewNopLogger()}
 	frozen = false
 }
 
@@ -113,29 +106,29 @@ func WithKeyVals(keyvals ...any) Logger {
 }
 
 type logWrapper struct {
-	BaseLogger
+	tmlog.Logger
 }
 
 func (l logWrapper) Debug(msg string) {
-	l.BaseLogger.Debug(msg)
+	l.Logger.Debug(msg)
 }
 
 func (l logWrapper) Debugf(format string, a ...any) {
-	l.BaseLogger.Debug(fmt.Sprintf(format, a...))
+	l.Logger.Debug(fmt.Sprintf(format, a...))
 }
 
 func (l logWrapper) Info(msg string) {
-	l.BaseLogger.Info(msg)
+	l.Logger.Info(msg)
 }
 
 func (l logWrapper) Infof(format string, a ...any) {
-	l.BaseLogger.Info(fmt.Sprintf(format, a...))
+	l.Logger.Info(fmt.Sprintf(format, a...))
 }
 
 func (l logWrapper) Error(msg string) {
-	l.BaseLogger.Error(msg)
+	l.Logger.Error(msg)
 }
 
 func (l logWrapper) Errorf(format string, a ...any) {
-	l.BaseLogger.Error(fmt.Sprintf(format, a...))
+	l.Logger.Error(fmt.Sprintf(format, a...))
 }
