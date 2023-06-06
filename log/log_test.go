@@ -108,7 +108,7 @@ func TestDebugWithCtx(t *testing.T) {
 	assert.Equal(t, "debug2", <-output)
 	assert.Equal(t, []any{"key1", "val1", "key2", 2}, <-keyvals)
 
-	ctx = log.AppendKeyVals(ctx, "key3", true)
+	ctx = log.Append(ctx, "key3", true)
 
 	log.FromCtx(ctx).Debugf("debug%d", 3)
 	assert.Equal(t, "debug3", <-output)
@@ -138,7 +138,7 @@ func TestInfoWithCtx(t *testing.T) {
 	assert.Equal(t, "info2", <-output)
 	assert.Equal(t, []any{"key1", "val1", "key2", 2}, <-keyvals)
 
-	ctx = log.AppendKeyVals(ctx, "key3", true)
+	ctx = log.Append(ctx, "key3", true)
 
 	log.FromCtx(ctx).Infof("info%d", 3)
 	assert.Equal(t, "info3", <-output)
@@ -168,7 +168,7 @@ func TestErrorWithCtx(t *testing.T) {
 	assert.Equal(t, "error2", <-output)
 	assert.Equal(t, []any{"key1", "val1", "key2", 2}, <-keyvals)
 
-	ctx = log.AppendKeyVals(ctx, "key3", true)
+	ctx = log.Append(ctx, "key3", true)
 
 	log.FromCtx(ctx).Errorf("error%d", 3)
 	assert.Equal(t, "error3", <-output)
@@ -204,11 +204,11 @@ func TestWithKeyVals(t *testing.T) {
 		Keyvals: keyvals,
 	})
 
-	log.WithKeyVals("key1", false).Debug("debug")
+	log.With("key1", false).Debug("debug")
 	assert.Equal(t, "debug", <-output)
 	assert.Equal(t, []any{"key1", false}, <-keyvals)
 
-	log.WithKeyVals("key2", 5).Info("info")
+	log.With("key2", 5).Info("info")
 	assert.Equal(t, "info", <-output)
 	assert.Equal(t, []any{"key2", 5}, <-keyvals)
 

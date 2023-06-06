@@ -72,7 +72,14 @@ type key int
 
 var logKey key
 
+// Append adds the given keyval pair to the given context. If the context already stores keyvals, the new ones get appended.
+// This should be used to track the logging context across the application.
+func Append(ctx context.Context, key, val any) context.Context {
+	return AppendKeyVals(ctx, key, val)
+}
+
 // AppendKeyVals adds the given keyvals to the given context. If the context already stores keyvals, the new ones get appended.
+// Use Append instead if you only want to add a single keyval pair.
 // This should be used to track the logging context across the application.
 func AppendKeyVals(ctx context.Context, keyvals ...any) context.Context {
 	if len(keyvals)%2 != 0 {
@@ -93,6 +100,12 @@ func FromCtx(ctx context.Context) Logger {
 	}
 
 	return logWrapper{defaultLogger.With(keyVals...)}
+}
+
+// With returns a logger that adds the given keyval pair to any logs it puts out.
+// This should be used for immediate log enrichment, for tracking of a logging context across the application use Append
+func With(key, val any) Logger {
+	return WithKeyVals(key, val)
 }
 
 // WithKeyVals returns a logger that adds the given keyvals to any logs it puts out.
