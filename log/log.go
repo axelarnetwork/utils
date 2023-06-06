@@ -74,21 +74,21 @@ var logKey key
 
 // Append adds the given keyval pair to the given context. If the context already stores keyvals, the new ones get appended.
 // This should be used to track the logging context across the application.
-func Append(ctx context.Context, key, val any) context.Context {
+func Append(ctx context.Context, key, val any) Context {
 	return AppendKeyVals(ctx, key, val)
 }
 
 // AppendKeyVals adds the given keyvals to the given context. If the context already stores keyvals, the new ones get appended.
 // Use Append instead if you only want to add a single keyval pair.
 // This should be used to track the logging context across the application.
-func AppendKeyVals(ctx context.Context, keyvals ...any) context.Context {
+func AppendKeyVals(ctx context.Context, keyvals ...any) Context {
 	if len(keyvals)%2 != 0 {
-		return ctx
+		return Context{ctx}
 	}
 
 	existingKeyvals, _ := ctx.Value(logKey).([]any)
 
-	return context.WithValue(ctx, logKey, append(existingKeyvals, keyvals...))
+	return Context{context.WithValue(ctx, logKey, append(existingKeyvals, keyvals...))}
 }
 
 // FromCtx reads logging keyvals from the given context if any and adds them to any logs the returned Logger puts out
@@ -144,4 +144,14 @@ func (l logWrapper) Error(msg string) {
 
 func (l logWrapper) Errorf(format string, a ...any) {
 	l.Logger.Error(fmt.Sprintf(format, a...))
+}
+
+// Context is a wrapper around context.Context that allows to append keyvals to the context.
+type Context struct {
+	context.Context
+}
+
+// Append adds the given keyval pair to the logging context. If the context already stores keyvals, the new ones get appended.
+func (c Context) Append(key, val any) Context {
+	return Append(c, key, val)
 }
