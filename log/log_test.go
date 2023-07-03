@@ -238,6 +238,18 @@ func TestAppendKeyVals(t *testing.T) {
 	assert.Equal(t, []any{"key1", "val1", "key2", 2, "key3", true}, <-keyvals)
 }
 
+func TestGetKeyVals(t *testing.T) {
+	ctx := context.Background()
+
+	assert.Nil(t, log.GetKeyVals(ctx))
+
+	keyvals := []any{"key1", "val1", "key2", 2, "key3", true}
+
+	ctx = log.AppendKeyVals(ctx, keyvals...)
+
+	assert.Equal(t, keyvals, log.GetKeyVals(ctx))
+}
+
 type testLogger struct {
 	Output  chan<- string
 	Keyvals chan<- []any
