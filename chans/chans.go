@@ -176,8 +176,13 @@ func RangeBig(from, to *big.Int) <-chan *big.Int {
 // Returns number of items drained.
 func Drain[T any](channel <-chan T) int {
 	drained := 0
-	for range channel {
-		drained++
+
+	for {
+		select {
+		case <-channel:
+			drained++
+		default:
+			return drained
+		}
 	}
-	return drained
 }
