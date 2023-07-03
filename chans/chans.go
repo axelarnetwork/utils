@@ -179,8 +179,12 @@ func Drain[T any](channel <-chan T) int {
 
 	for {
 		select {
-		case <-channel:
-			drained++
+		case _, ok := <-channel:
+			if ok {
+				drained++
+			} else {
+				return drained
+			}
 		default:
 			return drained
 		}
