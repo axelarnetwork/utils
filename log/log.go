@@ -91,7 +91,7 @@ func AppendKeyVals(ctx context.Context, keyvals ...any) Context {
 	return Context{context.WithValue(ctx, logKey, append(existingKeyvals, keyvals...))}
 }
 
-// FromCtx reads logging keyvals from the given context if any and adds them to any logs the returned Logger puts out
+// FromCtx reads logging keyvals from the given context if there are any and adds them to any logs the returned Logger puts out
 func FromCtx(ctx context.Context) Logger {
 	keyVals, ok := ctx.Value(logKey).([]any)
 
@@ -100,6 +100,17 @@ func FromCtx(ctx context.Context) Logger {
 	}
 
 	return logWrapper{defaultLogger.With(keyVals...)}
+}
+
+// GetKeyVals returns the logging keyvals from the given context if there are any
+func GetKeyVals(ctx context.Context) []any {
+	keyVals, ok := ctx.Value(logKey).([]any)
+
+	if !ok || len(keyVals) == 0 {
+		return nil
+	}
+
+	return keyVals
 }
 
 // With returns a logger that adds the given keyval pair to any logs it puts out.
