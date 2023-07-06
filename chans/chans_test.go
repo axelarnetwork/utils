@@ -203,7 +203,7 @@ func TestPushPop(t *testing.T) {
 
 func TestDrain(t *testing.T) {
 	c := make(chan string, 10)
-	
+
 	c <- "a"
 	c <- "b"
 	c <- "c"
@@ -213,4 +213,15 @@ func TestDrain(t *testing.T) {
 	assert.Equal(t, 4, chans.Drain(c))
 	_, ok := <-c
 	assert.False(t, ok)
+}
+
+func TestDrainOpen(t *testing.T) {
+	o := make(chan string, 10)
+
+	o <- "a"
+	o <- "b"
+	o <- "c"
+	o <- "d"
+
+	assert.Equal(t, 4, chans.DrainOpen(o))
 }

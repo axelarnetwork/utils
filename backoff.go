@@ -12,8 +12,12 @@ type BackOff func(currentRetryCount int) time.Duration
 func ExponentialBackOff(minTimeout time.Duration) BackOff {
 	return func(currentRetryCount int) time.Duration {
 		jitter := rand.Float64()
-		strategy := 1 << currentRetryCount
-		backoff := (1 + float64(strategy)*jitter) * minTimeout.Seconds() * float64(time.Second)
+		jitterMax := 200 * time.Millisecond
+		if currentRetryCount < 1 {
+			currentRetryCount = 1
+		}
+		strategy := 1 << (currentRetryCount - 1)
+		backoff := (float64(strategy) * float64(minTimeout.Nanoseconds())) + (jitter * float64(jitterMax.Nanoseconds()))
 
 		return time.Duration(backoff)
 	}
@@ -23,9 +27,11 @@ func ExponentialBackOff(minTimeout time.Duration) BackOff {
 func LinearBackOff(minTimeout time.Duration) BackOff {
 	return func(currentRetryCount int) time.Duration {
 		jitter := rand.Float64()
-		strategy := float64(currentRetryCount)
-
-		backoff := (1 + strategy*jitter) * minTimeout.Seconds() * float64(time.Second)
+		jitterMax := 200 * time.Millisecond
+		if currentRetryCount < 1 {
+			currentRetryCount = 1
+		}
+		backoff := (float64(currentRetryCount) * float64(minTimeout.Nanoseconds())) + (jitter * float64(jitterMax.Nanoseconds()))
 		return time.Duration(backoff)
 	}
 }
