@@ -202,7 +202,6 @@ func TestPushPop(t *testing.T) {
 }
 
 func TestDrain(t *testing.T) {
-	// drain closed channel
 	c := make(chan string, 10)
 
 	c <- "a"
@@ -214,8 +213,9 @@ func TestDrain(t *testing.T) {
 	assert.Equal(t, 4, chans.Drain(c))
 	_, ok := <-c
 	assert.False(t, ok)
+}
 
-	// drain open channel
+func TestDrainOpen(t *testing.T) {
 	o := make(chan string, 10)
 
 	o <- "a"
