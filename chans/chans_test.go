@@ -223,5 +223,5 @@ func TestDrainOpen(t *testing.T) {
 	o <- "c"
 	o <- "d"
 
-	assert.Equal(t, 4, chans.Drain(o))
+	assert.Equal(t, 4, chans.DrainOpen(o))
 }
