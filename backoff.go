@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"github.com/axelarnetwork/utils/math"
 	"math/rand"
 	"time"
 )
@@ -13,7 +14,7 @@ func ExponentialBackOff(minTimeout time.Duration) BackOff {
 	return func(currentRetryCount int) time.Duration {
 		jitter := rand.Float64() + 0.5
 		strategy := 1 << currentRetryCount
-		backoff := jitter * float64(strategy) * float64(minTimeout.Nanoseconds())
+		backoff := math.Max(jitter*float64(strategy)*float64(minTimeout.Nanoseconds()), float64(minTimeout.Nanoseconds()))
 
 		return time.Duration(backoff)
 	}
@@ -23,7 +24,7 @@ func ExponentialBackOff(minTimeout time.Duration) BackOff {
 func LinearBackOff(minTimeout time.Duration) BackOff {
 	return func(currentRetryCount int) time.Duration {
 		jitter := rand.Float64() + 0.5
-		backoff := jitter * float64(currentRetryCount) * float64(minTimeout.Nanoseconds())
+		backoff := math.Max(jitter*float64(currentRetryCount)*float64(minTimeout.Nanoseconds()), float64(minTimeout.Nanoseconds()))
 		return time.Duration(backoff)
 	}
 }

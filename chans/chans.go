@@ -172,9 +172,9 @@ func RangeBig(from, to *big.Int) <-chan *big.Int {
 	return newCh
 }
 
-// Drain enumerates all items from the channel and discards them.
-// Returns number of items drained.
-func Drain[T any](channel <-chan T) int {
+// DrainOpen enumerates all items from the channel and discards them.
+// Returns number of items drained as soon as channel is empty.
+func DrainOpen[T any](channel <-chan T) int {
 	drained := 0
 
 	for {
@@ -189,4 +189,14 @@ func Drain[T any](channel <-chan T) int {
 			return drained
 		}
 	}
+}
+
+// Drain enumerates all items from the channel and discards them.
+// Blocks until the channel is closed and returns number of items drained.
+func Drain[T any](channel <-chan T) int {
+	drained := 0
+	for range channel {
+		drained++
+	}
+	return drained
 }
