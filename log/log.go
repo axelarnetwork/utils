@@ -3,7 +3,7 @@ package log
 import (
 	"context"
 	"fmt"
-	tmlog "github.com/tendermint/tendermint/libs/log"
+	cmlog "github.com/cometbft/cometbft/libs/log"
 )
 
 // Logger is a simple interface to log at three log levels with additional formatting methods for convenience
@@ -17,13 +17,13 @@ type Logger interface {
 }
 
 var (
-	defaultLogger = logWrapper{tmlog.NewNopLogger()}
+	defaultLogger = logWrapper{cmlog.NewNopLogger()}
 	frozen        bool
 )
 
 // Setup sets the logger that the application should use. The default is a nop logger, i.e. all logs are discarded.
 // Panics if called more than once without calling Reset first.
-func Setup(logger tmlog.Logger) {
+func Setup(logger cmlog.Logger) {
 	if frozen {
 		panic("logger was already set")
 	}
@@ -34,7 +34,7 @@ func Setup(logger tmlog.Logger) {
 
 // Reset returns the logger state to the default nop logger and enables Setup to be called again.
 func Reset() {
-	defaultLogger = logWrapper{tmlog.NewNopLogger()}
+	defaultLogger = logWrapper{cmlog.NewNopLogger()}
 	frozen = false
 }
 
@@ -130,7 +130,7 @@ func WithKeyVals(keyvals ...any) Logger {
 }
 
 type logWrapper struct {
-	tmlog.Logger
+	cmlog.Logger
 }
 
 func (l logWrapper) Debug(msg string) {
