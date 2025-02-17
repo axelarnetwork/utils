@@ -3,7 +3,6 @@ package log
 import (
 	"context"
 	"fmt"
-	"reflect"
 
 	tmlog "github.com/tendermint/tendermint/libs/log"
 )
@@ -24,25 +23,29 @@ type tmLogger interface {
 	Error(msg string, keyvals ...any)
 }
 
+type tmLoggerConfig[R any] interface {
+	With(keyvals ...any) R
+}
+
 var (
-	defaultLogger = logWrapper{tmlog.NewNopLogger()}
+	defaultLogger = newLogWrapper(tmlog.NewNopLogger())
 	frozen        bool
 )
 
 // Setup sets the logger that the application should use. The default is a nop logger, i.e. all logs are discarded.
 // Panics if called more than once without calling Reset first.
-func Setup(logger tmLogger) {
+func Setup[R tmLogger](logger R) {
 	if frozen {
 		panic("logger was already set")
 	}
 
-	defaultLogger = logWrapper{logger}
+	defaultLogger = newLogWrapper(logger)
 	frozen = true
 }
 
 // Reset returns the logger state to the default nop logger and enables Setup to be called again.
 func Reset() {
-	defaultLogger = logWrapper{tmlog.NewNopLogger()}
+	defaultLogger = newLogWrapper(tmlog.NewNopLogger())
 	frozen = false
 }
 
@@ -137,8 +140,32 @@ func WithKeyVals(keyvals ...any) Logger {
 	return defaultLogger.With(keyvals...)
 }
 
+func newLogWrapper[R tmLogger](logger R) logWrapper {
+	var with func(...any) Logger = nil
+
+	if cfg, ok := any(logger).(tmLoggerConfig[R]); ok {
+		with = func(keyvals ...any) Logger { return newLogWrapper(cfg.With(keyvals...)) }
+	} else if cfg, ok := any(logger).(tmLoggerConfig[tmLogger]); ok {
+		with = func(keyvals ...any) Logger { return newLogWrapper(cfg.With(keyvals...)) }
+	} else if cfg, ok := any(logger).(tmLoggerConfig[Logger]); ok {
+		with = func(keyvals ...any) Logger { return cfg.With(keyvals...) }
+	} else {
+		/* TODO: consider following code
+		with = func(keyvals ...any) Logger {
+			res := reflect.ValueOf(logger).MethodByName("With").CallSlice([]reflect.Value{reflect.ValueOf(keyvals)})
+			l := res[0].Interface().(tmLogger)
+			return newLogWrapper(l)
+		}
+		*/
+		panic("not supported")
+	}
+
+	return logWrapper{logger, with}
+}
+
 type logWrapper struct {
 	logger tmLogger
+	with   func(...any) Logger
 }
 
 func (l logWrapper) Debug(msg string) {
@@ -166,10 +193,7 @@ func (l logWrapper) Errorf(format string, a ...any) {
 }
 
 func (l logWrapper) With(keyvals ...any) Logger {
-	res := reflect.ValueOf(l.logger).MethodByName("With").CallSlice([]reflect.Value{reflect.ValueOf(keyvals)})
-	logger := res[0].Interface().(tmLogger)
-
-	return logWrapper{logger}
+	return l.with(keyvals...)
 }
 
 // Context is a wrapper around context.Context that allows to append keyvals to the context.
