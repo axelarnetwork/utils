@@ -3,6 +3,8 @@ package log
 import (
 	"context"
 	"fmt"
+	"reflect"
+
 	tmlog "github.com/tendermint/tendermint/libs/log"
 )
 
@@ -16,6 +18,12 @@ type Logger interface {
 	Errorf(format string, a ...any)
 }
 
+type tmLogger interface {
+	Debug(msg string, keyvals ...any)
+	Info(msg string, keyvals ...any)
+	Error(msg string, keyvals ...any)
+}
+
 var (
 	defaultLogger = logWrapper{tmlog.NewNopLogger()}
 	frozen        bool
@@ -23,7 +31,7 @@ var (
 
 // Setup sets the logger that the application should use. The default is a nop logger, i.e. all logs are discarded.
 // Panics if called more than once without calling Reset first.
-func Setup(logger tmlog.Logger) {
+func Setup(logger tmLogger) {
 	if frozen {
 		panic("logger was already set")
 	}
@@ -99,7 +107,7 @@ func FromCtx(ctx context.Context) Logger {
 		return defaultLogger
 	}
 
-	return logWrapper{defaultLogger.With(keyVals...)}
+	return defaultLogger.With(keyVals...)
 }
 
 // GetKeyVals returns the logging keyvals from the given context if there are any
@@ -126,35 +134,42 @@ func WithKeyVals(keyvals ...any) Logger {
 		return defaultLogger
 	}
 
-	return logWrapper{defaultLogger.With(keyvals...)}
+	return defaultLogger.With(keyvals...)
 }
 
 type logWrapper struct {
-	tmlog.Logger
+	logger tmLogger
 }
 
 func (l logWrapper) Debug(msg string) {
-	l.Logger.Debug(msg)
+	l.logger.Debug(msg)
 }
 
 func (l logWrapper) Debugf(format string, a ...any) {
-	l.Logger.Debug(fmt.Sprintf(format, a...))
+	l.logger.Debug(fmt.Sprintf(format, a...))
 }
 
 func (l logWrapper) Info(msg string) {
-	l.Logger.Info(msg)
+	l.logger.Info(msg)
 }
 
 func (l logWrapper) Infof(format string, a ...any) {
-	l.Logger.Info(fmt.Sprintf(format, a...))
+	l.logger.Info(fmt.Sprintf(format, a...))
 }
 
 func (l logWrapper) Error(msg string) {
-	l.Logger.Error(msg)
+	l.logger.Error(msg)
 }
 
 func (l logWrapper) Errorf(format string, a ...any) {
-	l.Logger.Error(fmt.Sprintf(format, a...))
+	l.logger.Error(fmt.Sprintf(format, a...))
+}
+
+func (l logWrapper) With(keyvals ...any) Logger {
+	res := reflect.ValueOf(l.logger).MethodByName("With").CallSlice([]reflect.Value{reflect.ValueOf(keyvals)})
+	logger := res[0].Interface().(tmLogger)
+
+	return logWrapper{logger}
 }
 
 // Context is a wrapper around context.Context that allows to append keyvals to the context.
