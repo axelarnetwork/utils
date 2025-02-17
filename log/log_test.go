@@ -245,22 +245,22 @@ type testLogger struct {
 	keyvals []any
 }
 
-func (t *testLogger) Debug(msg string, keyvals ...interface{}) {
+func (t *testLogger) Debug(msg string, keyvals ...any) {
 	t.Output <- msg
 	t.Keyvals <- append(t.keyvals, keyvals...)
 }
 
-func (t *testLogger) Info(msg string, keyvals ...interface{}) {
+func (t *testLogger) Info(msg string, keyvals ...any) {
 	t.Output <- msg
 	t.Keyvals <- append(t.keyvals, keyvals...)
 }
 
-func (t *testLogger) Error(msg string, keyvals ...interface{}) {
+func (t *testLogger) Error(msg string, keyvals ...any) {
 	t.Output <- msg
 	t.Keyvals <- append(t.keyvals, keyvals...)
 }
 
-func (t *testLogger) With(keyvals ...interface{}) tmlog.Logger {
+func (t *testLogger) With(keyvals ...any) tmlog.Logger {
 	return &testLogger{
 		Output:  t.Output,
 		Keyvals: t.Keyvals,
