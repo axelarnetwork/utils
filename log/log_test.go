@@ -6,7 +6,6 @@ import (
 
 	"github.com/axelarnetwork/utils/log"
 	"github.com/stretchr/testify/assert"
-	tmlog "github.com/tendermint/tendermint/libs/log"
 )
 
 func TestNoSetup(t *testing.T) {
@@ -21,7 +20,7 @@ func TestTmLogSetup(t *testing.T) {
 	t.Cleanup(log.Reset)
 
 	assert.NotPanics(t, func() {
-		log.Setup(tmlog.NewNopLogger())
+		log.Setup(log.NewNopLogger())
 	})
 }
 
@@ -29,8 +28,8 @@ func TestMultipleSetups(t *testing.T) {
 	t.Cleanup(log.Reset)
 
 	assert.Panics(t, func() {
-		log.Setup(tmlog.NewNopLogger())
-		log.Setup(tmlog.NewNopLogger())
+		log.Setup(log.NewNopLogger())
+		log.Setup(log.NewNopLogger())
 	})
 }
 
@@ -232,7 +231,7 @@ func TestGetKeyVals(t *testing.T) {
 	assert.Equal(t, keyvals, log.GetKeyVals(ctx))
 }
 
-func newTestLogger(output chan<- string, keyvals chan<- []any) tmlog.Logger {
+func newTestLogger(output chan<- string, keyvals chan<- []any) log.MinimalLogger {
 	return &testLogger{
 		Output:  output,
 		Keyvals: keyvals,
@@ -260,7 +259,7 @@ func (t *testLogger) Error(msg string, keyvals ...any) {
 	t.Keyvals <- append(t.keyvals, keyvals...)
 }
 
-func (t *testLogger) With(keyvals ...any) tmlog.Logger {
+func (t *testLogger) With(keyvals ...any) log.MinimalLogger {
 	return &testLogger{
 		Output:  t.Output,
 		Keyvals: t.Keyvals,

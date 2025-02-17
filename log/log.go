@@ -3,8 +3,6 @@ package log
 import (
 	"context"
 	"fmt"
-
-	tmlog "github.com/tendermint/tendermint/libs/log"
 )
 
 // Logger is a simple interface to log at three log levels with additional formatting methods for convenience
@@ -17,24 +15,24 @@ type Logger interface {
 	Errorf(format string, a ...any)
 }
 
-type tmLogger interface {
+type MinimalLogger interface {
 	Debug(msg string, keyvals ...any)
 	Info(msg string, keyvals ...any)
 	Error(msg string, keyvals ...any)
 }
 
-type tmLoggerConfig[R any] interface {
+type MinimalLoggerConfig[R any] interface {
 	With(keyvals ...any) R
 }
 
 var (
-	defaultLogger = newLogWrapper(tmlog.NewNopLogger())
+	defaultLogger = newLogWrapper(NewNopLogger())
 	frozen        bool
 )
 
 // Setup sets the logger that the application should use. The default is a nop logger, i.e. all logs are discarded.
 // Panics if called more than once without calling Reset first.
-func Setup[R tmLogger](logger R) {
+func Setup[R MinimalLogger](logger R) {
 	if frozen {
 		panic("logger was already set")
 	}
@@ -45,7 +43,7 @@ func Setup[R tmLogger](logger R) {
 
 // Reset returns the logger state to the default nop logger and enables Setup to be called again.
 func Reset() {
-	defaultLogger = newLogWrapper(tmlog.NewNopLogger())
+	defaultLogger = newLogWrapper(NewNopLogger())
 	frozen = false
 }
 
@@ -140,14 +138,14 @@ func WithKeyVals(keyvals ...any) Logger {
 	return defaultLogger.With(keyvals...)
 }
 
-func newLogWrapper[R tmLogger](logger R) logWrapper {
+func newLogWrapper[R MinimalLogger](logger R) logWrapper {
 	var with func(...any) Logger = nil
 
-	if cfg, ok := any(logger).(tmLoggerConfig[R]); ok {
+	if cfg, ok := any(logger).(MinimalLoggerConfig[R]); ok {
 		with = func(keyvals ...any) Logger { return newLogWrapper(cfg.With(keyvals...)) }
-	} else if cfg, ok := any(logger).(tmLoggerConfig[tmLogger]); ok {
+	} else if cfg, ok := any(logger).(MinimalLoggerConfig[MinimalLogger]); ok {
 		with = func(keyvals ...any) Logger { return newLogWrapper(cfg.With(keyvals...)) }
-	} else if cfg, ok := any(logger).(tmLoggerConfig[Logger]); ok {
+	} else if cfg, ok := any(logger).(MinimalLoggerConfig[Logger]); ok {
 		with = func(keyvals ...any) Logger { return cfg.With(keyvals...) }
 	} else {
 		/* TODO: consider following code
@@ -164,7 +162,7 @@ func newLogWrapper[R tmLogger](logger R) logWrapper {
 }
 
 type logWrapper struct {
-	logger tmLogger
+	logger MinimalLogger
 	with   func(...any) Logger
 }
 
@@ -205,3 +203,11 @@ type Context struct {
 func (c Context) Append(key, val any) Context {
 	return Append(c, key, val)
 }
+
+type nopLogger struct{}
+
+func NewNopLogger() MinimalLogger              { return &nopLogger{} }
+func (nopLogger) Info(string, ...any)          {}
+func (nopLogger) Debug(string, ...any)         {}
+func (nopLogger) Error(string, ...any)         {}
+func (l *nopLogger) With(...any) MinimalLogger { return l }
