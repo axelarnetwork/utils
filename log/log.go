@@ -195,10 +195,10 @@ func NewNopLogger() *NopLogger { return &NopLogger{} }
 // NopLogger is a logger that discards all logs
 type NopLogger struct{}
 
-// Debug is a no-op
+// Info is a no-op
 func (NopLogger) Info(string, ...any) {}
 
-// Info is a no-op
+// Debug is a no-op
 func (NopLogger) Debug(string, ...any) {}
 
 // Error is a no-op
