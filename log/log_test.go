@@ -231,7 +231,7 @@ func TestGetKeyVals(t *testing.T) {
 	assert.Equal(t, keyvals, log.GetKeyVals(ctx))
 }
 
-// tmlogLogger emulates the tendermint tmlogLogger interface
+// tmlogLogger emulates the tendermint Logger interface
 type tmlogLogger interface {
 	Debug(msg string, keyvals ...any)
 	Info(msg string, keyvals ...any)
