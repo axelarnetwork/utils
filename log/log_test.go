@@ -231,15 +231,15 @@ func TestGetKeyVals(t *testing.T) {
 	assert.Equal(t, keyvals, log.GetKeyVals(ctx))
 }
 
-// logger emulates the tendermint logger interface
-type logger interface {
+// tmlogLogger emulates the tendermint tmlogLogger interface
+type tmlogLogger interface {
 	Debug(msg string, keyvals ...any)
 	Info(msg string, keyvals ...any)
 	Error(msg string, keyvals ...any)
-	With(keyvals ...any) logger
+	With(keyvals ...any) tmlogLogger
 }
 
-func newTestLogger(output chan<- string, keyvals chan<- []any) logger {
+func newTestLogger(output chan<- string, keyvals chan<- []any) tmlogLogger {
 	return &testLogger{
 		Output:  output,
 		Keyvals: keyvals,
@@ -267,7 +267,7 @@ func (t *testLogger) Error(msg string, keyvals ...any) {
 	t.Keyvals <- append(t.keyvals, keyvals...)
 }
 
-func (t *testLogger) With(keyvals ...any) logger {
+func (t *testLogger) With(keyvals ...any) tmlogLogger {
 	return &testLogger{
 		Output:  t.Output,
 		Keyvals: t.Keyvals,
