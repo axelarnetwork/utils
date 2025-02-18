@@ -15,12 +15,14 @@ type Logger interface {
 	Errorf(format string, a ...any)
 }
 
+// MinimalLogger is a minimalistic logger interface that only supports three log levels
 type MinimalLogger interface {
 	Debug(msg string, keyvals ...any)
 	Info(msg string, keyvals ...any)
 	Error(msg string, keyvals ...any)
 }
 
+// MinimalLoggerConfig is a logger interface that supports adding keyvals to the logger
 type MinimalLoggerConfig[R any] interface {
 	MinimalLogger
 	With(keyvals ...any) R
@@ -187,11 +189,20 @@ func (c Context) Append(key, val any) Context {
 	return Append(c, key, val)
 }
 
-func NewNopLogger() *nopLogger { return &nopLogger{} }
+// NewNopLogger returns a logger that discards all logs
+func NewNopLogger() *NopLogger { return &NopLogger{} }
 
-type nopLogger struct{}
+// NopLogger is a logger that discards all logs
+type NopLogger struct{}
 
-func (nopLogger) Info(string, ...any)       {}
-func (nopLogger) Debug(string, ...any)      {}
-func (nopLogger) Error(string, ...any)      {}
-func (l *nopLogger) With(...any) *nopLogger { return l }
+// Debug is a no-op
+func (NopLogger) Info(string, ...any) {}
+
+// Info is a no-op
+func (NopLogger) Debug(string, ...any) {}
+
+// Error is a no-op
+func (NopLogger) Error(string, ...any) {}
+
+// With is a no-op
+func (l *NopLogger) With(...any) *NopLogger { return l }
