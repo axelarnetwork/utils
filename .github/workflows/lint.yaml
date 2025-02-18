@@ -8,13 +8,14 @@ jobs:
     strategy:
       matrix:
         go-version:
-          - 1.18.x
+          - stable
+          - oldstable
         os:
           - ubuntu-22.04
     runs-on: ${{ matrix.os }}
     steps:
       - name: Install Go
-        uses: actions/setup-go@v2
+        uses: actions/setup-go@v5
         with:
           go-version: ${{ matrix.go-version }}
 
