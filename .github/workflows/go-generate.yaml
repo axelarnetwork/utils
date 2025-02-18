@@ -29,11 +29,6 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Install moq
-        run: |
-          git config --global url."git@github.com:axelarnetwork".insteadOf https://github.com/axelarnetwork
-          go get github.com/matryer/moq
-
       - name: Install mdformat
 
         uses: BSFishy/pip-action@v1
