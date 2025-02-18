@@ -16,7 +16,7 @@ func TestNoSetup(t *testing.T) {
 	})
 }
 
-func TestTmLogSetup(t *testing.T) {
+func TestLogSetup(t *testing.T) {
 	t.Cleanup(log.Reset)
 
 	assert.NotPanics(t, func() {
@@ -231,7 +231,15 @@ func TestGetKeyVals(t *testing.T) {
 	assert.Equal(t, keyvals, log.GetKeyVals(ctx))
 }
 
-func newTestLogger(output chan<- string, keyvals chan<- []any) log.MinimalLogger {
+// logger emulates the tendermint logger interface
+type logger interface {
+	Debug(msg string, keyvals ...any)
+	Info(msg string, keyvals ...any)
+	Error(msg string, keyvals ...any)
+	With(keyvals ...any) logger
+}
+
+func newTestLogger(output chan<- string, keyvals chan<- []any) logger {
 	return &testLogger{
 		Output:  output,
 		Keyvals: keyvals,
@@ -259,7 +267,7 @@ func (t *testLogger) Error(msg string, keyvals ...any) {
 	t.Keyvals <- append(t.keyvals, keyvals...)
 }
 
-func (t *testLogger) With(keyvals ...any) log.MinimalLogger {
+func (t *testLogger) With(keyvals ...any) logger {
 	return &testLogger{
 		Output:  t.Output,
 		Keyvals: t.Keyvals,

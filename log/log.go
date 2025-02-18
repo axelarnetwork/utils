@@ -22,6 +22,7 @@ type MinimalLogger interface {
 }
 
 type MinimalLoggerConfig[R any] interface {
+	MinimalLogger
 	With(keyvals ...any) R
 }
 
@@ -32,7 +33,7 @@ var (
 
 // Setup sets the logger that the application should use. The default is a nop logger, i.e. all logs are discarded.
 // Panics if called more than once without calling Reset first.
-func Setup[R MinimalLogger](logger R) {
+func Setup[R MinimalLoggerConfig[R]](logger R) {
 	if frozen {
 		panic("logger was already set")
 	}
@@ -138,26 +139,8 @@ func WithKeyVals(keyvals ...any) Logger {
 	return defaultLogger.With(keyvals...)
 }
 
-func newLogWrapper[R MinimalLogger](logger R) logWrapper {
-	var with func(...any) Logger = nil
-
-	if cfg, ok := any(logger).(MinimalLoggerConfig[R]); ok {
-		with = func(keyvals ...any) Logger { return newLogWrapper(cfg.With(keyvals...)) }
-	} else if cfg, ok := any(logger).(MinimalLoggerConfig[MinimalLogger]); ok {
-		with = func(keyvals ...any) Logger { return newLogWrapper(cfg.With(keyvals...)) }
-	} else if cfg, ok := any(logger).(MinimalLoggerConfig[Logger]); ok {
-		with = func(keyvals ...any) Logger { return cfg.With(keyvals...) }
-	} else {
-		/* TODO: consider following code
-		with = func(keyvals ...any) Logger {
-			res := reflect.ValueOf(logger).MethodByName("With").CallSlice([]reflect.Value{reflect.ValueOf(keyvals)})
-			l := res[0].Interface().(tmLogger)
-			return newLogWrapper(l)
-		}
-		*/
-		panic("not supported")
-	}
-
+func newLogWrapper[R MinimalLoggerConfig[R]](logger R) logWrapper {
+	with := func(a ...any) Logger { return newLogWrapper(logger.With(a...)) }
 	return logWrapper{logger, with}
 }
 
@@ -204,10 +187,11 @@ func (c Context) Append(key, val any) Context {
 	return Append(c, key, val)
 }
 
+func NewNopLogger() *nopLogger { return &nopLogger{} }
+
 type nopLogger struct{}
 
-func NewNopLogger() MinimalLogger              { return &nopLogger{} }
-func (nopLogger) Info(string, ...any)          {}
-func (nopLogger) Debug(string, ...any)         {}
-func (nopLogger) Error(string, ...any)         {}
-func (l *nopLogger) With(...any) MinimalLogger { return l }
+func (nopLogger) Info(string, ...any)       {}
+func (nopLogger) Debug(string, ...any)      {}
+func (nopLogger) Error(string, ...any)      {}
+func (l *nopLogger) With(...any) *nopLogger { return l }
