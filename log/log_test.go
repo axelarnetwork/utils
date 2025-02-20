@@ -2,10 +2,10 @@ package log_test
 
 import (
 	"context"
+	"testing"
+
 	"github.com/axelarnetwork/utils/log"
 	"github.com/stretchr/testify/assert"
-	tmlog "github.com/tendermint/tendermint/libs/log"
-	"testing"
 )
 
 func TestNoSetup(t *testing.T) {
@@ -16,12 +16,20 @@ func TestNoSetup(t *testing.T) {
 	})
 }
 
+func TestLogSetup(t *testing.T) {
+	t.Cleanup(log.Reset)
+
+	assert.NotPanics(t, func() {
+		log.Setup(log.NewNopLogger())
+	})
+}
+
 func TestMultipleSetups(t *testing.T) {
 	t.Cleanup(log.Reset)
 
 	assert.Panics(t, func() {
-		log.Setup(tmlog.NewNopLogger())
-		log.Setup(tmlog.NewNopLogger())
+		log.Setup(log.NewNopLogger())
+		log.Setup(log.NewNopLogger())
 	})
 }
 
@@ -31,10 +39,7 @@ func TestDebug(t *testing.T) {
 	output := make(chan string, 1000)
 	keyvals := make(chan []any, 1000)
 
-	log.Setup(&testLogger{
-		Output:  output,
-		Keyvals: keyvals,
-	})
+	log.Setup(newTestLogger(output, keyvals))
 
 	log.Debug("debug")
 	assert.Equal(t, "debug", <-output)
@@ -51,10 +56,7 @@ func TestInfo(t *testing.T) {
 	output := make(chan string, 1000)
 	keyvals := make(chan []any, 1000)
 
-	log.Setup(&testLogger{
-		Output:  output,
-		Keyvals: keyvals,
-	})
+	log.Setup(newTestLogger(output, keyvals))
 
 	log.Info("info")
 	assert.Equal(t, "info", <-output)
@@ -71,10 +73,7 @@ func TestError(t *testing.T) {
 	output := make(chan string, 1000)
 	keyvals := make(chan []any, 1000)
 
-	log.Setup(&testLogger{
-		Output:  output,
-		Keyvals: keyvals,
-	})
+	log.Setup(newTestLogger(output, keyvals))
 
 	log.Error("error")
 	assert.Equal(t, "error", <-output)
@@ -91,10 +90,7 @@ func TestDebugWithCtx(t *testing.T) {
 	output := make(chan string, 1000)
 	keyvals := make(chan []any, 1000)
 
-	log.Setup(&testLogger{
-		Output:  output,
-		Keyvals: keyvals,
-	})
+	log.Setup(newTestLogger(output, keyvals))
 
 	ctx := context.Background()
 
@@ -121,10 +117,7 @@ func TestInfoWithCtx(t *testing.T) {
 	output := make(chan string, 1000)
 	keyvals := make(chan []any, 1000)
 
-	log.Setup(&testLogger{
-		Output:  output,
-		Keyvals: keyvals,
-	})
+	log.Setup(newTestLogger(output, keyvals))
 
 	ctx := context.Background()
 
@@ -151,10 +144,7 @@ func TestErrorWithCtx(t *testing.T) {
 	output := make(chan string, 1000)
 	keyvals := make(chan []any, 1000)
 
-	log.Setup(&testLogger{
-		Output:  output,
-		Keyvals: keyvals,
-	})
+	log.Setup(newTestLogger(output, keyvals))
 
 	ctx := context.Background()
 
@@ -181,10 +171,7 @@ func TestWrongKeyVals(t *testing.T) {
 	output := make(chan string, 1000)
 	keyvals := make(chan []any, 1000)
 
-	log.Setup(&testLogger{
-		Output:  output,
-		Keyvals: keyvals,
-	})
+	log.Setup(newTestLogger(output, keyvals))
 
 	ctx := log.AppendKeyVals(context.Background(), "key1", "val1", "key2", 2, "key3")
 
@@ -199,10 +186,7 @@ func TestWithKeyVals(t *testing.T) {
 	output := make(chan string, 1000)
 	keyvals := make(chan []any, 1000)
 
-	log.Setup(&testLogger{
-		Output:  output,
-		Keyvals: keyvals,
-	})
+	log.Setup(newTestLogger(output, keyvals))
 
 	log.With("key1", false).Debug("debug")
 	assert.Equal(t, "debug", <-output)
@@ -223,10 +207,7 @@ func TestAppendKeyVals(t *testing.T) {
 	output := make(chan string, 1000)
 	keyvals := make(chan []any, 1000)
 
-	log.Setup(&testLogger{
-		Output:  output,
-		Keyvals: keyvals,
-	})
+	log.Setup(newTestLogger(output, keyvals))
 
 	ctx := log.Append(context.Background(), "key1", "val1").
 		Append("key2", 2).
@@ -250,28 +231,43 @@ func TestGetKeyVals(t *testing.T) {
 	assert.Equal(t, keyvals, log.GetKeyVals(ctx))
 }
 
+// tmlogLogger emulates the tendermint Logger interface
+type tmlogLogger interface {
+	Debug(msg string, keyvals ...any)
+	Info(msg string, keyvals ...any)
+	Error(msg string, keyvals ...any)
+	With(keyvals ...any) tmlogLogger
+}
+
+func newTestLogger(output chan<- string, keyvals chan<- []any) tmlogLogger {
+	return &testLogger{
+		Output:  output,
+		Keyvals: keyvals,
+	}
+}
+
 type testLogger struct {
 	Output  chan<- string
 	Keyvals chan<- []any
 	keyvals []any
 }
 
-func (t *testLogger) Debug(msg string, keyvals ...interface{}) {
+func (t *testLogger) Debug(msg string, keyvals ...any) {
 	t.Output <- msg
 	t.Keyvals <- append(t.keyvals, keyvals...)
 }
 
-func (t *testLogger) Info(msg string, keyvals ...interface{}) {
+func (t *testLogger) Info(msg string, keyvals ...any) {
 	t.Output <- msg
 	t.Keyvals <- append(t.keyvals, keyvals...)
 }
 
-func (t *testLogger) Error(msg string, keyvals ...interface{}) {
+func (t *testLogger) Error(msg string, keyvals ...any) {
 	t.Output <- msg
 	t.Keyvals <- append(t.keyvals, keyvals...)
 }
 
-func (t *testLogger) With(keyvals ...interface{}) tmlog.Logger {
+func (t *testLogger) With(keyvals ...any) tmlogLogger {
 	return &testLogger{
 		Output:  t.Output,
 		Keyvals: t.Keyvals,

@@ -3,7 +3,6 @@ package log
 import (
 	"context"
 	"fmt"
-	tmlog "github.com/tendermint/tendermint/libs/log"
 )
 
 // Logger is a simple interface to log at three log levels with additional formatting methods for convenience
@@ -16,25 +15,38 @@ type Logger interface {
 	Errorf(format string, a ...any)
 }
 
+// MinimalLogger is a minimalistic logger interface that only supports three log levels
+type MinimalLogger interface {
+	Debug(msg string, keyvals ...any)
+	Info(msg string, keyvals ...any)
+	Error(msg string, keyvals ...any)
+}
+
+// MinimalLoggerConfig is a logger interface that supports adding keyvals to the logger
+type MinimalLoggerConfig[R any] interface {
+	MinimalLogger
+	With(keyvals ...any) R
+}
+
 var (
-	defaultLogger = logWrapper{tmlog.NewNopLogger()}
+	defaultLogger = newLogWrapper(NewNopLogger())
 	frozen        bool
 )
 
 // Setup sets the logger that the application should use. The default is a nop logger, i.e. all logs are discarded.
 // Panics if called more than once without calling Reset first.
-func Setup(logger tmlog.Logger) {
+func Setup[R MinimalLoggerConfig[R]](logger R) {
 	if frozen {
 		panic("logger was already set")
 	}
 
-	defaultLogger = logWrapper{logger}
+	defaultLogger = newLogWrapper(logger)
 	frozen = true
 }
 
 // Reset returns the logger state to the default nop logger and enables Setup to be called again.
 func Reset() {
-	defaultLogger = logWrapper{tmlog.NewNopLogger()}
+	defaultLogger = newLogWrapper(NewNopLogger())
 	frozen = false
 }
 
@@ -99,7 +111,7 @@ func FromCtx(ctx context.Context) Logger {
 		return defaultLogger
 	}
 
-	return logWrapper{defaultLogger.With(keyVals...)}
+	return defaultLogger.With(keyVals...)
 }
 
 // GetKeyVals returns the logging keyvals from the given context if there are any
@@ -126,35 +138,45 @@ func WithKeyVals(keyvals ...any) Logger {
 		return defaultLogger
 	}
 
-	return logWrapper{defaultLogger.With(keyvals...)}
+	return defaultLogger.With(keyvals...)
+}
+
+func newLogWrapper[R MinimalLoggerConfig[R]](logger R) logWrapper {
+	with := func(a ...any) Logger { return newLogWrapper(logger.With(a...)) }
+	return logWrapper{logger, with}
 }
 
 type logWrapper struct {
-	tmlog.Logger
+	logger MinimalLogger
+	with   func(...any) Logger
 }
 
 func (l logWrapper) Debug(msg string) {
-	l.Logger.Debug(msg)
+	l.logger.Debug(msg)
 }
 
 func (l logWrapper) Debugf(format string, a ...any) {
-	l.Logger.Debug(fmt.Sprintf(format, a...))
+	l.logger.Debug(fmt.Sprintf(format, a...))
 }
 
 func (l logWrapper) Info(msg string) {
-	l.Logger.Info(msg)
+	l.logger.Info(msg)
 }
 
 func (l logWrapper) Infof(format string, a ...any) {
-	l.Logger.Info(fmt.Sprintf(format, a...))
+	l.logger.Info(fmt.Sprintf(format, a...))
 }
 
 func (l logWrapper) Error(msg string) {
-	l.Logger.Error(msg)
+	l.logger.Error(msg)
 }
 
 func (l logWrapper) Errorf(format string, a ...any) {
-	l.Logger.Error(fmt.Sprintf(format, a...))
+	l.logger.Error(fmt.Sprintf(format, a...))
+}
+
+func (l logWrapper) With(keyvals ...any) Logger {
+	return l.with(keyvals...)
 }
 
 // Context is a wrapper around context.Context that allows to append keyvals to the context.
@@ -166,3 +188,21 @@ type Context struct {
 func (c Context) Append(key, val any) Context {
 	return Append(c, key, val)
 }
+
+// NewNopLogger returns a logger that discards all logs
+func NewNopLogger() *NopLogger { return &NopLogger{} }
+
+// NopLogger is a logger that discards all logs
+type NopLogger struct{}
+
+// Info is a no-op
+func (NopLogger) Info(string, ...any) {}
+
+// Debug is a no-op
+func (NopLogger) Debug(string, ...any) {}
+
+// Error is a no-op
+func (NopLogger) Error(string, ...any) {}
+
+// With is a no-op
+func (l *NopLogger) With(...any) *NopLogger { return l }
