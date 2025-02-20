@@ -3,8 +3,11 @@ package log
 import (
 	"context"
 	"fmt"
+
 	tmlog "github.com/tendermint/tendermint/libs/log"
 )
+
+//go:generate moq . Logger
 
 // Logger is a simple interface to log at three log levels with additional formatting methods for convenience
 type Logger interface {
