@@ -2,9 +2,9 @@ package log_test
 
 import (
 	"context"
+	sdklog "cosmossdk.io/log"
 	"github.com/axelarnetwork/utils/log"
 	"github.com/stretchr/testify/assert"
-	tmlog "github.com/tendermint/tendermint/libs/log"
 	"testing"
 )
 
@@ -20,8 +20,8 @@ func TestMultipleSetups(t *testing.T) {
 	t.Cleanup(log.Reset)
 
 	assert.Panics(t, func() {
-		log.Setup(tmlog.NewNopLogger())
-		log.Setup(tmlog.NewNopLogger())
+		log.Setup(sdklog.NewNopLogger())
+		log.Setup(sdklog.NewNopLogger())
 	})
 }
 
@@ -266,15 +266,24 @@ func (t *testLogger) Info(msg string, keyvals ...interface{}) {
 	t.Keyvals <- append(t.keyvals, keyvals...)
 }
 
+func (t *testLogger) Warn(msg string, keyvals ...interface{}) {
+	t.Output <- msg
+	t.Keyvals <- append(t.keyvals, keyvals...)
+}
+
 func (t *testLogger) Error(msg string, keyvals ...interface{}) {
 	t.Output <- msg
 	t.Keyvals <- append(t.keyvals, keyvals...)
 }
 
-func (t *testLogger) With(keyvals ...interface{}) tmlog.Logger {
+func (t *testLogger) With(keyvals ...interface{}) sdklog.Logger {
 	return &testLogger{
 		Output:  t.Output,
 		Keyvals: t.Keyvals,
 		keyvals: append(t.keyvals, keyvals...),
 	}
+}
+
+func (t *testLogger) Impl() any {
+	return t
 }
